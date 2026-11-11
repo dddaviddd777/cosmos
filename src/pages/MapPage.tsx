@@ -142,7 +142,11 @@ export function MapPage({ state, setState, paused }: Props) {
             <button className="map-sheet__close" onClick={() => select(null)} aria-label="Treu la selecció"><Icon name="close" /></button>
           </div>
         ) : (
-          <p className="map-page__hint muted">Toca un planeta per veure’n el nom i obrir-ne la fitxa.</p>
+          <p className="map-page__hint muted">
+            {scale === 'real'
+              ? 'Mides i distàncies reals: de lluny els planetes són punts. Toca la Terra i «Centra» per veure-hi la Lluna.'
+              : 'Toca un planeta per veure’n el nom i obrir-ne la fitxa.'}
+          </p>
         )}
         <TimeBar
           date={date}

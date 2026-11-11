@@ -5,6 +5,8 @@ import { elementsAt, keplerOrbit } from '../astro/kepler';
 import { length } from '../astro/engine';
 import { SMALL_SCENE_BODIES, heliocentricOf, smallBodyData } from '../astro/positions';
 import { toScene, type ScaleMode } from './scale';
+import { useBodyScale } from './useBodyScale';
+import { diameterKm } from '../astro/profile';
 
 /** Mida visual fixa dels cossos petits (a escala serien invisibles). */
 export const SMALL_BODY_RADIUS = 0.2;
@@ -46,6 +48,7 @@ export function SmallBodies({ date, scale, positions, selectedId, onSelect, visi
           sunDistanceAu={b.kind === 'cometa' ? length(heliocentricOf(b, date)!) : Infinity}
           selected={selectedId === b.id}
           onSelect={onSelect}
+          scale={scale}
         />
       ))}
     </>
@@ -60,12 +63,15 @@ interface BodyProps {
   sunDistanceAu: number;
   selected: boolean;
   onSelect: (id: string) => void;
+  scale: ScaleMode;
 }
 
 /** Els cometes desenvolupen cua quan el Sol n'escalfa el gel, aproximadament a menys de 5 UA. */
 const TAIL_START_AU = 5;
 
-function SmallBody({ info, orbit, position, sunDistanceAu, selected, onSelect }: BodyProps) {
+function SmallBody({ info, orbit, position, sunDistanceAu, selected, onSelect, scale }: BodyProps) {
+  // Grup de radi 1 (cos, zona tàctil, anell i etiqueta). A escala real, mida real quan t'hi apropes.
+  const sized = useBodyScale(scale, diameterKm(info) / 2, false, SMALL_BODY_RADIUS);
   const isComet = info.kind === 'cometa';
   const showLabel = selected || info.kind === 'planeta nan';
 
@@ -96,8 +102,9 @@ function SmallBody({ info, orbit, position, sunDistanceAu, selected, onSelect }:
       />
       {tail && <Line points={tail} color="#cfeaff" transparent opacity={0.6} lineWidth={2.5} />}
       <group position={position}>
+       <group ref={sized}>
         <mesh>
-          <sphereGeometry args={[SMALL_BODY_RADIUS, 12, 12]} />
+          <sphereGeometry args={[1, 16, 16]} />
           <meshBasicMaterial color={info.color} />
         </mesh>
         {/* Zona tàctil més gran que el cos, per poder-lo tocar amb el dit */}
@@ -109,20 +116,21 @@ function SmallBody({ info, orbit, position, sunDistanceAu, selected, onSelect }:
           onPointerOver={() => (document.body.style.cursor = 'pointer')}
           onPointerOut={() => (document.body.style.cursor = '')}
         >
-          <sphereGeometry args={[0.8, 8, 8]} />
+          <sphereGeometry args={[4, 8, 8]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
         {selected && (
           <mesh rotation={[-Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[0.45, 0.52, 48]} />
+            <ringGeometry args={[2.25, 2.6, 48]} />
             <meshBasicMaterial color="#ffffff" transparent opacity={0.85} side={2} />
           </mesh>
         )}
         {showLabel && (
-          <Html position={[0, 0.7, 0]} center zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
+          <Html position={[0, 3.5, 0]} center zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
             <span className={`label label--small ${selected ? 'label--selected' : ''}`}>{info.name}</span>
           </Html>
         )}
+       </group>
       </group>
     </>
   );

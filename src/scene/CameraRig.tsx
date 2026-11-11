@@ -11,8 +11,8 @@ interface Controls {
 interface Props {
   /** Posició actual a l'escena del cos a seguir, o null per alliberar la càmera */
   target: [number, number, number] | null;
-  /** Radi visual del cos (per decidir a quina distància posar-se) */
-  radius: number;
+  /** Distància a què s'ha de posar la càmera del cos */
+  distance: number;
   /** Canvia cada cop que es demana un nou centrat (inicia l'animació de vol) */
   nonce: number;
 }
@@ -24,7 +24,7 @@ const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 
  * Vola fins al cos seleccionat i després el segueix mentre es mou (el temps avança),
  * deixant que l'usuari continuï girant i fent zoom al seu voltant.
  */
-export function CameraRig({ target, radius, nonce }: Props) {
+export function CameraRig({ target, distance, nonce }: Props) {
   const camera = useThree((s) => s.camera);
   const controls = useThree((s) => s.controls) as unknown as Controls | null;
   const flight = useRef<{ t: number; fromCam: Vector3; fromTarget: Vector3; dir: Vector3 } | null>(null);
@@ -55,7 +55,7 @@ export function CameraRig({ target, radius, nonce }: Props) {
     if (f) {
       f.t = Math.min(1, f.t + dt / FLIGHT_SECONDS);
       const k = ease(f.t);
-      const endCam = tgt.clone().addScaledVector(f.dir, Math.max(radius * 10, 5));
+      const endCam = tgt.clone().addScaledVector(f.dir, distance);
       controls.target.lerpVectors(f.fromTarget, tgt, k);
       camera.position.lerpVectors(f.fromCam, endCam, k);
       if (f.t >= 1) flight.current = null;
