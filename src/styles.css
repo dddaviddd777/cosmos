@@ -1,0 +1,199 @@
+:root {
+  --bg: #05070f;
+  --surface: rgba(14, 19, 36, 0.86);
+  --border: rgba(120, 140, 200, 0.22);
+  --text: #e6e9f2;
+  --muted: #8b93ab;
+  --accent: #ffc94a;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(--bg); }
+button, select, input { font: inherit; color: inherit; }
+
+
+.scale-toggle, .timebar__controls { display: flex; gap: 4px; flex-wrap: wrap; }
+.scale-toggle button, .timebar button, .timebar select, .timebar input {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 6px 10px; cursor: pointer; min-height: 36px;
+}
+.timebar input { color-scheme: dark; }
+button.active { background: #2a3a6e; border-color: #5a72c0; }
+
+.label {
+  font-size: 12px; color: var(--text); white-space: nowrap; user-select: none;
+  text-shadow: 0 0 4px #000, 0 0 2px #000; opacity: .85;
+}
+.label--selected { font-weight: 700; opacity: 1; }
+.label--small { font-size: 11px; opacity: .7; }
+.toggle-small {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 6px 10px; cursor: pointer; min-height: 36px;
+}
+
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; }
+.muted { color: var(--muted); }
+
+.card__facts { margin: 8px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+.card__facts div { min-width: 0; }
+.card__facts dt { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+.card__facts dd { margin: 0; font-size: .85rem; }
+.orbit-facts { border-top: 1px solid var(--border); margin-top: 8px; }
+.orbit-facts h3 { margin: 10px 0 2px; }
+.orbit-facts__note { font-size: .72rem; line-height: 1.4; margin: 4px 0 0; }
+
+.wiki { border-top: 1px solid var(--border); margin-top: 10px; padding-top: 4px; }
+.wiki img { float: right; max-width: 96px; max-height: 96px; margin: 0 0 6px 10px; border-radius: 6px; object-fit: cover; }
+.wiki__extract { margin: 4px 0 8px; }
+.wiki a { color: var(--accent); }
+.wiki__license { clear: both; font-size: .7rem; color: var(--muted); margin: 8px 0 0; }
+.wiki__license a { color: var(--muted); }
+
+
+/* ── Troba'l al cel ── */
+.finder {
+  position: fixed; inset: 0; z-index: 100; background: #050814; color: var(--text);
+  display: flex; flex-direction: column; overflow: auto;
+}
+.finder--camera { background: #000; overflow: hidden; }
+.finder__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.finder__top {
+  position: relative; z-index: 3; display: flex; align-items: center; gap: 10px;
+  padding: max(10px, env(safe-area-inset-top)) 16px 10px;
+  background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,0));
+}
+.finder__top button {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 6px 12px; min-height: 40px; cursor: pointer;
+}
+.finder__title { flex: 1; display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+.finder__title strong { font-size: 1.1rem; }
+.finder__title small { color: var(--muted); font-size: .75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.finder__panel {
+  position: relative; z-index: 3; margin: 8px 16px; padding: 14px 16px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  max-width: 560px; align-self: center; width: calc(100% - 32px); line-height: 1.5;
+}
+.finder__panel h2 { margin: 0 0 8px; font-size: 1.25rem; }
+.finder__intro ul { padding-left: 4px; list-style: none; margin: 8px 0; }
+.finder__intro li { margin: 6px 0; }
+.finder__buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
+.finder__buttons button, .finder__buttons select {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 14px; min-height: 44px; cursor: pointer; color-scheme: dark;
+}
+.finder__buttons button.primary { background: var(--accent); color: #1a1405; border: none; font-weight: 650; }
+.finder__tip { font-size: .8rem; }
+.finder__danger { color: #ffb4a8; font-weight: 600; }
+.finder__notice { color: #ffd98a; }
+.finder__bottom {
+  position: relative; z-index: 3; margin-top: auto; padding: 12px 16px max(14px, env(safe-area-inset-bottom));
+  background: linear-gradient(rgba(5,8,20,0), rgba(5,8,20,.88) 22%);
+  font-size: .92rem; line-height: 1.45; max-width: 640px; width: 100%; align-self: center;
+}
+.finder__bottom p { margin: 4px 0; }
+.finder__guide { font-size: 1.1rem; font-weight: 650; }
+.finder__guide--hit { color: #8dffb0; }
+.finder__coords { font-size: .78rem; }
+.finder__map { display: flex; flex-direction: column; align-items: center; }
+.finder__map-help { font-size: .78rem; margin: 6px 0 0; }
+.finder__overlay { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.finder__cross {
+  position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; transform: translate(-50%, -50%);
+  border: 2px solid rgba(255,255,255,.7); border-radius: 50%; box-shadow: 0 0 0 1px rgba(0,0,0,.4);
+}
+.finder__cross::before, .finder__cross::after {
+  content: ''; position: absolute; background: rgba(255,255,255,.7);
+}
+.finder__cross::before { left: 50%; top: -12px; bottom: -12px; width: 1px; }
+.finder__cross::after { top: 50%; left: -12px; right: -12px; height: 1px; }
+.finder__cross--hit { border-color: #8dffb0; box-shadow: 0 0 18px #8dffb0; }
+.finder__target {
+  position: absolute; width: 44px; height: 44px; transform: translate(-50%, -50%);
+  border: 3px solid var(--accent); border-radius: 50%; box-shadow: 0 0 12px rgba(255,201,74,.8);
+}
+.finder__target span {
+  position: absolute; top: 48px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+  font-weight: 700; text-shadow: 0 0 4px #000, 0 0 2px #000;
+}
+.finder__arrow {
+  position: absolute; left: 50%; top: 50%; font-size: 52px; color: var(--accent);
+  text-shadow: 0 0 10px rgba(0,0,0,.8); transform-origin: center; line-height: 1;
+}
+.finder__center-msg {
+  /* A dalt, per no tapar el punt de mira del centre */
+  position: absolute; z-index: 3; left: 50%; top: calc(72px + env(safe-area-inset-top)); transform: translateX(-50%);
+  background: var(--surface); padding: 8px 14px; border-radius: 10px; text-align: center; max-width: 86%; font-size: .85rem;
+}
+.skymap { width: min(100%, 420px); height: auto; display: block; }
+.skymap__card { fill: var(--accent); font-size: 10px; font-weight: 700; text-anchor: middle; }
+.skymap__alt { fill: #6b78a8; font-size: 6px; }
+.skymap__label { fill: var(--text); font-size: 6.5px; text-anchor: middle; }
+.skymap__label--target { fill: var(--accent); font-size: 8px; font-weight: 700; }
+.skymap__pulse { animation: pulse 1.6s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(1.35); } }
+@media (prefers-reduced-motion: reduce) { .skymap__pulse { animation: none; } }
+
+/* ── Poliment: botons d'icona, ajuda, càrrega, mode nocturn, focus ── */
+.icon-btn {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  min-width: 36px; min-height: 36px; padding: 0 8px; cursor: pointer; font-weight: 700;
+}
+.short { display: none; }
+@media (max-width: 700px) {
+  .toggle-small span, .long { display: none; }
+  .short { display: inline; }
+}
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 60; background: rgba(2, 4, 10, 0.7);
+  display: flex; justify-content: center; align-items: center; padding: 16px;
+}
+.modal {
+  width: min(560px, 100%); max-height: calc(100dvh - 32px); overflow: auto;
+  background: #0d1222; border: 1px solid var(--border); border-radius: 14px;
+  padding: 16px 20px; box-shadow: 0 20px 60px rgba(0,0,0,.5); line-height: 1.5; font-size: .92rem;
+}
+.modal__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.modal__head h2 { margin: 0 0 6px; font-size: 1.3rem; line-height: 1.25; }
+.modal__head button { background: none; border: none; color: var(--muted); font-size: 1.1rem; cursor: pointer; padding: 2px 6px; }
+.modal__actions { display: flex; justify-content: flex-end; margin-top: 14px; }
+.modal__actions .primary {
+  background: var(--accent); color: #1a1405; border: none; border-radius: 8px;
+  padding: 10px 18px; min-height: 44px; font-weight: 650; cursor: pointer;
+}
+.help__list { list-style: none; padding: 0; margin: 12px 0; }
+.help__list li { display: flex; gap: 10px; margin: 8px 0; }
+.help__list li > span { flex: none; width: 1.6em; text-align: center; }
+.help__more { border-top: 1px solid var(--border); padding: 8px 0; }
+.help__more summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
+.help__more ul { padding-left: 18px; }
+.help a, .modal a { color: #9fb4ff; }
+
+.scene-fallback {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px; text-align: center; max-width: 520px; margin: 0 auto;
+}
+.spinner {
+  display: inline-block; width: 1em; height: 1em; vertical-align: -0.15em; margin-right: 6px;
+  border: 2px solid var(--muted); border-top-color: transparent; border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.finder--loading { align-items: center; justify-content: center; color: var(--muted); }
+
+/* Multiplicar per vermell deixa només el canal vermell de tot el que hi ha a sota (text, 3D, càmera) */
+.night-filter {
+  position: fixed; inset: 0; z-index: 1000; pointer-events: none;
+  background: #d00000; mix-blend-mode: multiply;
+}
+html.night { color-scheme: dark; }
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 2.4s; }
+}
