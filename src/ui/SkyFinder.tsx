@@ -8,6 +8,10 @@ import {
 } from '../sky/hooks';
 import { cardinal, towardsCardinal, horizontalOf, nextRise, skyTargetOf, visibilityOf, type Horizontal } from '../sky/sky';
 import { SkyMap } from './SkyMap';
+import { clearFigures, drawFigures } from './arFigures';
+import { useStoredFlag } from './prefs';
+import { constellationsInSky, type SkyFigure } from '../sky/constelSky';
+import { constellationByOf } from '../astro/constellations';
 import { useDialog } from './useDialog';
 
 interface Props {
@@ -105,6 +109,20 @@ export function SkyFinder({ body, onClose, night, onNight }: Props) {
     }
   }, [orientation.status]);
 
+  // Figures de les constel·lacions sobre la càmera (es recalculen un cop per minut)
+  const [showCst, setShowCst] = useStoredFlag('cosmos.skymap.constellations', true);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const figures = useMemo<SkyFigure[]>(
+    () => (cameraMode && showCst && place ? constellationsInSky(new Date(minute * 60_000), place) : []),
+    [cameraMode, showCst, place, minute],
+  );
+  const highlight = target.constel ? target.id : target.sky ? constellationByOf(target.sky.constellation)?.id : undefined;
+  const figRef = useRef({ figures, calib, highlight });
+  figRef.current = { figures, calib, highlight };
+  useEffect(() => {
+    if (!showCst) clearFigures(canvas.current);
+  }, [showCst]);
+
   // Bucle de la vista de càmera
   const targetRef = useRef<Horizontal | null>(null);
   targetRef.current = vis ? { az: vis.pos.az + calib.daz, alt: vis.pos.alt + calib.dalt } : null;
@@ -121,7 +139,15 @@ export function SkyFinder({ body, onClose, night, onNight }: Props) {
         const R = smoothR.current;
         const [w, h] = [window.innerWidth, window.innerHeight];
         const f = focalForCover(camera.size.w, camera.size.h, w, h, CAMERA_FOV_DEG);
-        setView({ cam: cameraDirection(R), proj: project(tgt, R, screenAngle(), f, w, h), absolute: r.absolute });
+        const sa = screenAngle();
+        setView({ cam: cameraDirection(R), proj: project(tgt, R, sa, f, w, h), absolute: r.absolute });
+        const fig = figRef.current;
+        if (canvas.current && fig.figures.length) {
+          drawFigures(canvas.current, fig.figures, {
+            R, screenAngle: sa, focal: f, w, h, daz: fig.calib.daz, dalt: fig.calib.dalt, highlight: fig.highlight,
+            noLabel: target.constel ? target.id : undefined,
+          });
+        }
       }
       raf = requestAnimationFrame(loop);
     };
@@ -243,6 +269,7 @@ export function SkyFinder({ body, onClose, night, onNight }: Props) {
         <>
           {cameraMode && view && (
             <div className="finder__overlay" aria-hidden="true">
+              <canvas ref={canvas} className="finder__figures" />
               <div className={`finder__cross ${centered ? 'finder__cross--hit' : ''}`} />
               {view.proj.onScreen ? (
                 <div className="finder__target" style={{ left: view.proj.x, top: view.proj.y }}>
@@ -286,6 +313,9 @@ export function SkyFinder({ body, onClose, night, onNight }: Props) {
                 <div className="finder__buttons">
                   <button onClick={calibrate} title="Si veus l’objecte al centre de la pantalla però la marca no hi coincideix">🎯 Calibra: ja el tinc al centre</button>
                   {(calib.daz !== 0 || calib.dalt !== 0) && <button onClick={() => saveCalib({ daz: 0, dalt: 0 })}>Restableix</button>}
+                  <button className={showCst ? 'active' : ''} aria-pressed={showCst} onClick={() => setShowCst(!showCst)} title="Dibuixa les figures de les constel·lacions sobre el cel">
+                    ✦ Constel·lacions
+                  </button>
                 </div>
               </>
             ) : (

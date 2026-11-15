@@ -60,6 +60,8 @@ export function cameraDirection(R: Mat3): Horizontal {
 export interface Projection {
   /** L'objectiu és dins del camp de visió de la pantalla */
   onScreen: boolean;
+  /** És davant de la càmera (x i y tenen sentit encara que caigui fora de la pantalla) */
+  front: boolean;
   /** Posició a la pantalla (px des de dalt a l'esquerra), vàlida si onScreen */
   x: number;
   y: number;
@@ -82,11 +84,11 @@ export function project(target: Horizontal, R: Mat3, screenAngle: number, focalP
   const sy = d.x * Math.sin(t) + d.y * Math.cos(t);
   const offAngle = Math.acos(Math.max(-1, Math.min(1, -d.z))) / D;
   const arrowDeg = Math.atan2(-sy, sx) / D; // y de pantalla cap avall
-  if (d.z >= -1e-6) return { onScreen: false, x: 0, y: 0, offAngle, arrowDeg };
+  if (d.z >= -1e-6) return { onScreen: false, front: false, x: 0, y: 0, offAngle, arrowDeg };
   const x = w / 2 + (focalPx * sx) / -d.z;
   const y = h / 2 - (focalPx * sy) / -d.z;
   const onScreen = x >= 0 && x <= w && y >= 0 && y <= h;
-  return { onScreen, x, y, offAngle, arrowDeg };
+  return { onScreen, front: true, x, y, offAngle, arrowDeg };
 }
 
 /**

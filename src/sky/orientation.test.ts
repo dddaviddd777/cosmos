@@ -49,9 +49,18 @@ describe('projecció a la pantalla', () => {
     expect(p.arrowDeg).toBeCloseTo(-90, 6); // fletxa cap amunt
   });
 
+  it('davant però fora de pantalla → front, amb coordenades vàlides per dibuixar línies', () => {
+    const p = project({ az: 50, alt: 0 }, north, 0, F, W, H);
+    expect(p.onScreen).toBe(false);
+    expect(p.front).toBe(true);
+    expect(p.x).toBeGreaterThan(W);
+    expect(Number.isFinite(p.y)).toBe(true);
+  });
+
   it('darrere teu → fora de pantalla i fletxa cap a un costat', () => {
     const p = project({ az: 170, alt: 0 }, north, 0, F, W, H);
     expect(p.onScreen).toBe(false);
+    expect(p.front).toBe(false);
     expect(p.offAngle).toBeCloseTo(170, 6);
     expect(Math.abs(p.arrowDeg)).toBeLessThan(1); // gira a la dreta
   });

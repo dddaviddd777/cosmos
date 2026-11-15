@@ -216,3 +216,4 @@ a .skymap__cst-name { text-decoration: underline; text-decoration-color: rgba(12
 .tonight__map > summary::before { content: '▸ '; color: var(--accent); }
 .tonight__map[open] > summary::before { content: '▾ '; }
 .tonight__map .skymap-wrap { margin: 12px auto 0; }
+.finder__figures { position: absolute; inset: 0; width: 100%; height: 100%; }
