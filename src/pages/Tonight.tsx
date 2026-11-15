@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { hrefFor } from '../router';
 import { PLACE_PRESETS, useLocation } from '../sky/hooks';
 import { cardinal, towardsCardinal } from '../sky/sky';
-import { darkStart, farTonight, isDark, moonInfo, skyTonight, sunTimes, type FarEntry, type SkyEntry, type SkyStatus } from '../sky/tonight';
+import { darkStart, farTonight, constelTonight, isDark, moonInfo, skyTonight, sunTimes, type FarEntry, type SkyEntry, type SkyStatus } from '../sky/tonight';
 import type { SkyEye } from '../astro/beyond';
 import { Icon } from '../ui/Icon';
 
@@ -54,6 +54,7 @@ export function Tonight({ now, onFind }: Props) {
       t, darkNow, dark,
       entries: skyTonight(t, place),
       far: farTonight(t, place),
+      constel: constelTonight(t, place),
       tDark: isDark(t, place),
       moon: moonInfo(t),
       sun: sunTimes(t0, place),
@@ -89,7 +90,7 @@ export function Tonight({ now, onFind }: Props) {
     );
   }
 
-  const { t, darkNow, dark, entries, moon, sun, far, tDark } = data;
+  const { t, darkNow, dark, entries, moon, sun, far, constel, tDark } = data;
   const moonUp = entries.some((e) => e.body.id === 'moon' && (e.status === 'visible' || e.status === 'baix'));
   const atNow = darkNow || mode === 'ara' || !dark;
   const visible = entries.filter((e) => e.status === 'visible' || e.status === 'baix');
@@ -202,6 +203,36 @@ export function Tonight({ now, onFind }: Props) {
         </>
       )}
 
+      {tDark && (
+        <>
+          <h2 className="tonight__far-title">Constel·lacions</h2>
+          {constel.up.length > 0 ? (
+            <>
+              <p className="muted small">
+                Les més altes primer: com més amunt, més fàcil de veure. La direcció indica el centre de la figura.
+              </p>
+              <ul className="sky-list">
+                {constel.up.map((e) => <ConstelRow key={e.body.id} e={e} onFind={onFind} />)}
+              </ul>
+            </>
+          ) : (
+            <p className="muted">Ara no n’hi ha cap de prou alta.</p>
+          )}
+          {constel.down.length > 0 && (
+            <p className="muted small tonight__far-more">
+              <strong>Ara no es veuen (o són massa baixes):</strong>{' '}
+              {constel.down.map((e, i) => (
+                <span key={e.body.id}>
+                  {i > 0 && ', '}
+                  <a href={hrefFor.body(e.body.id)}>{e.body.name}</a>
+                </span>
+              ))}
+              .
+            </p>
+          )}
+        </>
+      )}
+
       <p className="muted small tonight__tip">
         Com distingir un planeta d’una estrella? Els estels fan pampallugues; els planetes brillen amb una llum més quieta.
       </p>
@@ -268,6 +299,26 @@ function FarRow({ e, onFind }: { e: FarEntry; onFind: (id: string) => void }) {
       </div>
       <button className="sky-row__find" onClick={() => onFind(e.body.id)} aria-label={`Troba ${e.body.name} al cel`}>
         <Icon name="telescope" /><span> Troba’l</span>
+      </button>
+    </li>
+  );
+}
+
+function ConstelRow({ e, onFind }: { e: FarEntry; onFind: (id: string) => void }) {
+  const c = e.body.constel!;
+  return (
+    <li className="sky-row">
+      <span className="body-row__dot" style={{ background: e.body.color }} aria-hidden="true" />
+      <div className="sky-row__main">
+        <a href={hrefFor.body(e.body.id)} className="sky-row__name">{e.body.name}</a>
+        <p>
+          Mira <strong>{towardsCardinal(e.pos.az)}</strong> i aixeca la vista <strong>{Math.round(e.pos.alt)}°</strong>
+          {e.pos.alt > 75 && ' (gairebé sobre el cap)'}
+        </p>
+        <p className="muted small">{c.tagline}</p>
+      </div>
+      <button className="sky-row__find" onClick={() => onFind(e.body.id)} aria-label={`Troba ${e.body.name} al cel`}>
+        <Icon name="telescope" /><span> Troba-la</span>
       </button>
     </li>
   );

@@ -6,8 +6,9 @@
  */
 import { Body } from 'astronomy-engine';
 import { BEYOND, type FixedSky } from './beyond';
+import { CONSTELLATIONS, type Constel } from './constellations';
 
-export type BodyKind = 'estrella' | 'planeta' | 'planeta nan' | 'satèl·lit' | 'asteroide' | 'cometa' | 'estel' | 'cel profund';
+export type BodyKind = 'estrella' | 'planeta' | 'planeta nan' | 'satèl·lit' | 'asteroide' | 'cometa' | 'estel' | 'cel profund' | 'constel·lació';
 
 export const KIND_LABELS: Record<BodyKind, string> = {
   estrella: 'Estrella',
@@ -18,6 +19,7 @@ export const KIND_LABELS: Record<BodyKind, string> = {
   cometa: 'Cometes',
   estel: 'Estrelles',
   'cel profund': 'Galàxies i cúmuls',
+  'constel·lació': 'Constel·lacions',
 };
 
 export const KIND_SINGULAR: Record<BodyKind, string> = {
@@ -29,6 +31,7 @@ export const KIND_SINGULAR: Record<BodyKind, string> = {
   cometa: 'Cometa',
   estel: 'Estrella',
   'cel profund': 'Objecte del cel profund',
+  'constel·lació': 'Constel·lació',
 };
 
 export interface Fact {
@@ -56,6 +59,8 @@ export interface BodyInfo {
   facts: Fact[];
   /** Objectes de fora del sistema solar: posició fixa al cel */
   sky?: FixedSky;
+  /** Constel·lacions: figura, centre i com trobar-la */
+  constel?: Constel;
 }
 
 export type SceneBody = BodyInfo & { body: Body };
@@ -301,7 +306,7 @@ function moon(
   return { id, name, kind: 'satèl·lit', parent, aliases, radiusKm, color: '#c8c4bd', wikiCa, wikiEn, intro, facts };
 }
 
-CATALOG.push(...BEYOND);
+CATALOG.push(...BEYOND, ...CONSTELLATIONS);
 
 const byId = new Map(CATALOG.map((b) => [b.id, b]));
 export const bodyById = (id: string): BodyInfo | undefined => byId.get(id);

@@ -149,7 +149,7 @@ export const BEYOND: BodyInfo[] = [
   'Sembla que formi part del cúmul de les Híades, en forma de V, però és molt més a prop: només és a la mateixa línia de visió. La sonda Pioneer 10 hi va en direcció i hi arribaria d’aquí a uns 2 milions d’anys.'),
 
   star('antares', 'Antares', ['Alfa de l’Escorpí', 'Alpha Scorpii', 'Cor de l’Escorpí'], {
-    ra: 16.4901, dec: -26.432, mag: 1.0, ly: 550, constellation: 'de l’Escorpí',
+    ra: 16.4901, dec: -26.432, mag: 1.0, ly: 550, constellation: 'de l’Escorpió',
     tagline: 'El cor vermell de l’Escorpí',
     hint: 'A l’estiu, baixa cap al sud: una estrella vermellosa al mig de l’Escorpí. Sovint es confon amb Mart.',
   }, 680, '#ff7a52', 'Antares (estrella)', 'Antares',

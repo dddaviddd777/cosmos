@@ -27,9 +27,14 @@ const ECL_TO_EQJ = Rotation_ECL_EQJ();
 
 export const observerOf = (p: Place) => new Observer(p.lat, p.lon, 0);
 
+/** Coordenades fixes (J2000) dels objectes que no es mouen al cel: estrelles, galàxies i constel·lacions */
+export function fixedRaDec(b: BodyInfo): { ra: number; dec: number } | undefined {
+  return b.sky ?? b.constel;
+}
+
 /** Cos que realment s'ha de buscar: les llunes sense efemèride es busquen al costat del seu planeta. */
 export function skyTargetOf(b: BodyInfo): BodyInfo {
-  if (b.body || SMALL_BODIES[b.id] || b.sky) return b;
+  if (b.body || SMALL_BODIES[b.id] || fixedRaDec(b)) return b;
   const parent = b.parent ? bodyById(b.parent) : undefined;
   return parent ?? b;
 }
@@ -38,15 +43,8 @@ export function skyTargetOf(b: BodyInfo): BodyInfo {
 export function horizontalOf(b: BodyInfo, date: Date, place: Place): Horizontal | null {
   const target = skyTargetOf(b);
   const obs = observerOf(place);
-  if (target.sky) {
-    // Coordenades fixes J2000 → equador i equinocci de la data (precessió i nutació)
-    const time = new AstroTime(date);
-    const ra = (target.sky.ra * 15 * Math.PI) / 180;
-    const dec = (target.sky.dec * Math.PI) / 180;
-    const v = new Vector(Math.cos(dec) * Math.cos(ra), Math.cos(dec) * Math.sin(ra), Math.sin(dec), time);
-    const eq = EquatorFromVector(RotateVector(Rotation_EQJ_EQD(time), v));
-    return horizon(date, obs, eq.ra, eq.dec);
-  }
+  const fixed = fixedRaDec(target);
+  if (fixed) return horizontalOfRaDec(fixed.ra, fixed.dec, date, place);
   if (target.body) {
     const p = skyPosition(target.body, date, obs);
     return horizon(date, obs, p.ra, p.dec);
@@ -70,6 +68,17 @@ export function horizontalOf(b: BodyInfo, date: Date, place: Place): Horizontal 
   return horizon(date, obs, eq.ra, eq.dec);
 }
 
+/** Azimut i altitud d'un punt fix del cel (ascensió recta J2000 en hores, declinació en graus) */
+export function horizontalOfRaDec(raH: number, decDeg: number, date: Date, place: Place): Horizontal {
+  // Coordenades J2000 → equador i equinocci de la data (precessió i nutació)
+  const time = new AstroTime(date);
+  const ra = (raH * 15 * Math.PI) / 180;
+  const dec = (decDeg * Math.PI) / 180;
+  const v = new Vector(Math.cos(dec) * Math.cos(ra), Math.cos(dec) * Math.sin(ra), Math.sin(dec), time);
+  const eq = EquatorFromVector(RotateVector(Rotation_EQJ_EQD(time), v));
+  return horizon(date, observerOf(place), eq.ra, eq.dec);
+}
+
 /**
  * Coordenades horitzontals amb refracció atmosfèrica, però només a prop o per sobre de l'horitzó:
  * astronomy-engine també l'aplica a sota, on no té sentit físic.
@@ -86,12 +95,15 @@ function horizon(date: Date, obs: Observer, ra: number, dec: number): Horizontal
  * Negativa: des d'allà no surt mai. Undefined si no és un objecte fix.
  */
 export function maxAltitude(b: BodyInfo, place: Place): number | undefined {
-  return b.sky ? 90 - Math.abs(place.lat - b.sky.dec) : undefined;
+  const fixed = fixedRaDec(b);
+  return fixed ? 90 - Math.abs(place.lat - fixed.dec) : undefined;
 }
 
 /** No es pon mai (sempre per sobre de l'horitzó) */
-export const isCircumpolar = (b: BodyInfo, place: Place) =>
-  !!b.sky && Math.abs(place.lat) + Math.abs(b.sky.dec) > 90 && Math.sign(place.lat) === Math.sign(b.sky.dec);
+export function isCircumpolar(b: BodyInfo, place: Place): boolean {
+  const fixed = fixedRaDec(b);
+  return !!fixed && Math.abs(place.lat) + Math.abs(fixed.dec) > 90 && Math.sign(place.lat) === Math.sign(fixed.dec);
+}
 
 /** Angle entre dues direccions del cel (graus). */
 export function separation(a: Horizontal, b: Horizontal): number {
@@ -123,7 +135,7 @@ export function visibilityOf(b: BodyInfo, date: Date, place: Place): Visibility 
   const sun = horizontalOf(bodyById('sun')!, date, place)!;
   const sunSeparation = target.id === 'sun' ? 0 : separation(pos, sun);
   const daylight = sun.alt > -0.8 ? 'dia' : sun.alt > -12 ? 'crepuscle' : 'nit';
-  const magnitude = target.body ? Illumination(target.body, date).mag : target.sky?.mag;
+  const magnitude = target.body ? Illumination(target.body, date).mag : target.sky?.mag ?? target.constel?.brightest;
   const notes: string[] = [];
   const danger = target.id === 'sun' || (sun.alt > -2 && sunSeparation < 15);
 
@@ -145,6 +157,11 @@ export function visibilityOf(b: BodyInfo, date: Date, place: Place): Visibility 
         const lit = Illumination(Body.Moon, date).phase_fraction;
         if (lit < 0.15 && daylight !== 'nit') notes.push('Ara és una lluna molt prima i hi ha claror: costarà veure-la.');
         else if (daylight === 'dia') notes.push('La Lluna també es veu de dia: busca-la al cel blau.');
+      } else if ((target.sky || target.constel) && daylight !== 'nit' && daylight !== 'crepuscle') {
+        notes.push('És de dia: no es veurà fins que es faci fosc.');
+      } else if (target.constel) {
+        notes.push('T’indiquem el centre de la figura: busca-hi les estrelles més brillants i compara-les amb el dibuix de la fitxa.');
+        if (daylight === 'crepuscle') notes.push('Espera que sigui ben fosc.');
       } else if (target.sky && daylight !== 'nit' && daylight !== 'crepuscle') {
         notes.push('És de dia: no es veurà fins que es faci fosc.');
       } else if (target.sky && target.sky.eye !== 'ull nu') {

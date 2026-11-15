@@ -190,3 +190,12 @@ button:active, .btn:active { transform: translateY(1px); }
 }
 
 @media (max-width: 700px) { .timebar input { max-width: 200px; } }
+
+/* ── Constel·lacions ── */
+.cst-figure { width: min(100%, 360px); height: auto; display: block; margin: 4px auto 10px; }
+.cst-figure__label { fill: var(--accent); font-size: 7.5px; font-weight: 600; text-anchor: middle; paint-order: stroke; stroke: #0a1029; stroke-width: 2.5px; }
+.cst-highlights { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; }
+.cst-highlights li::marker { color: var(--accent); }
+.cst-objects { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 0; }
+.chip-link { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 999px; text-decoration: none; color: var(--text); font-size: .88rem; }
+.chip-link:hover { border-color: var(--accent); }

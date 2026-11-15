@@ -147,3 +147,29 @@ export function farTonight(t: Date, place: Place): FarSky {
   out.down.sort((a, b) => (a.rise?.getTime() ?? Infinity) - (b.rise?.getTime() ?? Infinity));
   return out;
 }
+
+/** Constel·lacions principals */
+export const CONSTEL_BODIES = CATALOG.filter((b) => b.constel);
+
+export interface ConstelSky {
+  /** Prou amunt per veure-les bé, de més alta a més baixa */
+  up: FarEntry[];
+  /** Ara sota l'horitzó o massa baixes */
+  down: FarEntry[];
+}
+
+/**
+ * Altura mínima del centre de la figura perquè valgui la pena buscar-la: 15°, o menys per a les del sud
+ * (l'Escorpió o el Sagitari no pugen gaire més des de Catalunya).
+ */
+const constelMinAlt = (b: BodyInfo, place: Place) => Math.min(15, Math.max(4, (maxAltitude(b, place) ?? 90) * 0.6));
+
+export function constelTonight(t: Date, place: Place): ConstelSky {
+  const out: ConstelSky = { up: [], down: [] };
+  for (const body of CONSTEL_BODIES) {
+    const pos = horizontalOf(body, t, place)!;
+    (pos.alt >= constelMinAlt(body, place) ? out.up : out.down).push({ body, pos, rise: null });
+  }
+  out.up.sort((a, b) => b.pos.alt - a.pos.alt);
+  return out;
+}

@@ -11,6 +11,8 @@ import { MiniMap } from '../ui/MiniMap';
 import { OrbitFacts } from '../ui/OrbitFacts';
 import { Term } from '../ui/Term';
 import { Icon } from '../ui/Icon';
+import { ConstellationFigure } from '../ui/ConstellationFigure';
+import { constellationByOf, SEASON_TEXT } from '../astro/constellations';
 
 interface Props {
   body: BodyInfo;
@@ -48,7 +50,7 @@ export function BodyPage({ body, now, onFind, onShowOnMap }: Props) {
         <div>
           <h1 id="body-title">{body.name}</h1>
           <p className="muted">
-            {body.sky ? `${body.sky.type} · constel·lació ${body.sky.constellation}` : KIND_SINGULAR[body.kind]}
+            {body.sky ? <SkyKind body={body} /> : body.constel ? <>Constel·lació · {body.constel.season === 'tot l’any' ? 'es veu tot l’any' : `es veu millor ${SEASON_TEXT[body.constel.season].toLowerCase()}`}</> : KIND_SINGULAR[body.kind]}
             {parent && <> · lluna de <a href={hrefFor.body(parent.id)}>{parent.name}</a></>}
           </p>
         </div>
@@ -58,16 +60,18 @@ export function BodyPage({ body, now, onFind, onShowOnMap }: Props) {
       <div className="body-page__actions">
         {body.id !== 'earth' && (
           <button className="primary" onClick={() => onFind(body.id)}>
-            {body.id === 'sun' ? '☀️ On és el Sol ara?' : <><Icon name="telescope" /> Troba’l al cel</>}
+            {body.id === 'sun' ? '☀️ On és el Sol ara?' : <><Icon name="telescope" /> {body.constel ? 'Troba-la al cel' : 'Troba’l al cel'}</>}
           </button>
         )}
         <a className="btn" href={wiki.status === 'ok' ? wiki.data.url : wikipediaUrl(body)} target="_blank" rel="noopener noreferrer">
           Viquipèdia <Icon name="external" />
         </a>
-        {!body.sky && <button onClick={() => onShowOnMap(body.id)}><Icon name="orbit" /> Al mapa</button>}
+        {!body.sky && !body.constel && <button onClick={() => onShowOnMap(body.id)}><Icon name="orbit" /> Al mapa</button>}
       </div>
 
-      <section className="box now-box" aria-label="Ara mateix">
+      {body.constel && <ConstelBoxes body={body} />}
+
+      {!body.constel && <section className="box now-box" aria-label="Ara mateix">
         {body.sky ? (
           <FarNow body={body} now={now} />
         ) : body.id === 'earth' ? (
@@ -93,7 +97,7 @@ export function BodyPage({ body, now, onFind, onShowOnMap }: Props) {
         ) : (
           <p className="muted">La posició en temps real d’aquest cos encara no està disponible.</p>
         )}
-      </section>
+      </section>}
 
       {body.sky && <FindFar body={body} />}
 
@@ -232,5 +236,71 @@ function FindFar({ body }: { body: BodyInfo }) {
         {' '}Mira la llista d’<a href={hrefFor.nit}>Aquesta nit</a> per saber si ara és al cel.
       </p>
     </section>
+  );
+}
+
+/** «Estrella · constel·lació del Ca Major», amb l'enllaç a la constel·lació si en tenim la fitxa */
+function SkyKind({ body }: { body: BodyInfo }) {
+  const sky = body.sky!;
+  const cst = constellationByOf(sky.constellation);
+  return (
+    <>
+      {sky.type} · constel·lació{' '}
+      {cst ? <a href={hrefFor.body(cst.id)}>{sky.constellation}</a> : sky.constellation}
+    </>
+  );
+}
+
+/** Constel·lacions: la figura, com trobar-la i què s'hi pot veure */
+function ConstelBoxes({ body }: { body: BodyInfo }) {
+  const c = body.constel!;
+  const top = 90 - Math.abs(HOME_LAT - c.dec);
+  const from =
+    c.season === 'tot l’any' ? 'Des de Catalunya no es pon mai: és al cel totes les nits, girant al voltant de la Polar.'
+      : top < 25 ? `Des de Catalunya es veu baixa: com a molt a ${Math.round(top)}° sobre l’horitzó sud.`
+        : null;
+  const eye =
+    c.brightest < 1 ? 'Té estrelles molt brillants: es reconeix fins i tot des de ciutat.'
+      : c.brightest < 2.2 ? 'Les estrelles principals es veuen des de ciutat si el cel és net; la figura sencera, millor des d’un lloc fosc.'
+        : 'Les seves estrelles no són gaire brillants: cal un cel fosc, lluny dels llums.';
+  const objects = c.objects.map((id) => bodyById(id)).filter((b): b is BodyInfo => !!b);
+  return (
+    <>
+      <section className="box cst-box" aria-labelledby="fig-title">
+        <h2 id="fig-title">La figura</h2>
+        <ConstellationFigure body={body} />
+        <p className="muted small">
+          Tal com es veu mirant amunt, amb el nord a dalt. Com més gros és el punt, més brillant és l’estrella. Durant la nit
+          la figura es mou i gira, com tot el cel.
+        </p>
+      </section>
+
+      <section className="box" aria-labelledby="find-title">
+        <h2 id="find-title">Com trobar-la</h2>
+        <p>{c.hint}</p>
+        <p className="muted small find-far__eye">
+          <Icon name="eye" /> {eye}
+          {from && <> {from}</>}
+          {' '}Mira la llista d’<a href={hrefFor.nit}>Aquesta nit</a> per saber si ara és al cel.
+        </p>
+      </section>
+
+      <section className="box" aria-labelledby="hl-title">
+        <h2 id="hl-title">Què hi pots veure</h2>
+        <ul className="cst-highlights">
+          {c.highlights.map((h) => <li key={h}>{h}</li>)}
+        </ul>
+        {objects.length > 0 && (
+          <p className="cst-objects">
+            <span className="muted small">Fitxes:</span>{' '}
+            {objects.map((o) => (
+              <a key={o.id} className="chip-link" href={hrefFor.body(o.id)}>
+                <span className="body-row__dot" style={{ background: o.color }} aria-hidden="true" /> {o.name}
+              </a>
+            ))}
+          </p>
+        )}
+      </section>
+    </>
   );
 }

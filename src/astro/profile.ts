@@ -57,7 +57,7 @@ export const TAGLINES: Record<string, string> = {
   'hale-bopp': 'El gran cometa de 1997',
 };
 
-export const taglineOf = (b: BodyInfo) => TAGLINES[b.id] ?? b.sky?.tagline ?? '';
+export const taglineOf = (b: BodyInfo) => TAGLINES[b.id] ?? b.sky?.tagline ?? b.constel?.tagline ?? '';
 
 /** Gravetat a la superfície (m/s²). Als gegants gasosos, a l'altura dels núvols. */
 const GRAVITY: Record<string, number> = {
@@ -112,7 +112,7 @@ export interface Comparison {
 
 /** Comparacions senzilles amb la Terra (no n'hi ha per a la mateixa Terra) */
 export function compareWithEarth(b: BodyInfo): Comparison[] {
-  if (b.id === 'earth') return [];
+  if (b.id === 'earth' || b.constel) return [];
   if (b.sky) return compareFar(b);
   const out: Comparison[] = [];
 

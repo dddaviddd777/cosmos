@@ -31,7 +31,7 @@ export function HelpDialog({ welcome, onClose }: Props) {
         </p>
 
         <ul className="help__list">
-          <li><span><Icon name="list" /></span><div><strong>Explora</strong> tots els cossos en una llista: planetes, planetes nans, llunes, asteroides, cometes, i també estrelles i galàxies que es veuen sense telescopi. Pots cercar-los, filtrar-los i ordenar-los.</div></li>
+          <li><span><Icon name="list" /></span><div><strong>Explora</strong> tots els cossos en una llista: planetes, planetes nans, llunes, asteroides, cometes, i també estrelles, galàxies i constel·lacions que es veuen sense telescopi. Pots cercar-los, filtrar-los i ordenar-los.</div></li>
           <li><span><Icon name="eye" /></span><div><strong>Toca’n un</strong> per veure’n la fitxa: on és ara mateix, quant tarda la seva llum a arribar-te, com és comparat amb la Terra i un resum de la Viquipèdia.</div></li>
           <li><span><Icon name="telescope" /></span><div><strong>Troba’l al cel:</strong> el mòbil et guia amb la càmera fins al cos al cel real.</div></li>
           <li><span><Icon name="orbit" /></span><div><strong>Mapa:</strong> el sistema solar en 3D, on pots viatjar endavant i enrere en el temps.</div></li>
