@@ -10,7 +10,7 @@ const PAD = 18;
  * Projecció gnòmica al voltant del centre de la figura, tal com es veu mirant amunt:
  * el nord a dalt i l'est a l'esquerra.
  */
-function projector(c: Constel) {
+export function projector(c: Constel) {
   const ra0 = c.ra * 15 * D, d0 = c.dec * D;
   return (raH: number, decDeg: number): [number, number] => {
     const ra = raH * 15 * D, d = decDeg * D;

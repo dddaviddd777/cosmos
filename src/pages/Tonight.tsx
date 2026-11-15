@@ -6,6 +6,7 @@ import { darkStart, farTonight, constelTonight, isDark, moonInfo, skyTonight, su
 import type { SkyEye } from '../astro/beyond';
 import { Icon } from '../ui/Icon';
 import { SkyMap } from '../ui/SkyMap';
+import { BodyDot } from '../ui/BodyDot';
 
 /** «pel nord-est», «per l’est» */
 const towards = (c: string) => (/^[eo]/.test(c) ? `per l’${c}` : `pel ${c}`);
@@ -318,7 +319,7 @@ function ConstelRow({ e, onFind }: { e: FarEntry; onFind: (id: string) => void }
   const c = e.body.constel!;
   return (
     <li className="sky-row">
-      <span className="body-row__dot" style={{ background: e.body.color }} aria-hidden="true" />
+      <BodyDot body={e.body} />
       <div className="sky-row__main">
         <a href={hrefFor.body(e.body.id)} className="sky-row__name">{e.body.name}</a>
         <p>

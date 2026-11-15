@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { SEASON_TEXT } from '../astro/constellations';
+import { BodyDot } from '../ui/BodyDot';
 import { CATALOG, bodyById, KIND_LABELS, wikipediaUrl, type BodyInfo, type BodyKind } from '../astro/bodies';
 import { formatKm, formatLightTime, formatLy } from '../astro/format';
 import { liveDistance } from '../astro/live';
@@ -166,7 +167,7 @@ export function Explore({ state, onChange, now, selectedId, onFind, scrollRef }:
             <ul className="body-list">
               {g.items.map((b) => (
                 <li key={b.id} data-id={b.id} className={`body-row ${selectedId === b.id ? 'body-row--selected' : ''}`}>
-                  <span className="body-row__dot" style={{ background: b.color }} aria-hidden="true" />
+                  <BodyDot body={b} />
                   <div className="body-row__main">
                     <a className="body-row__link" href={hrefFor.body(b.id)} aria-current={selectedId === b.id ? 'page' : undefined}>
                       {b.name}

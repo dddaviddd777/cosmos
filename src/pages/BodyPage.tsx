@@ -12,6 +12,7 @@ import { OrbitFacts } from '../ui/OrbitFacts';
 import { Term } from '../ui/Term';
 import { Icon } from '../ui/Icon';
 import { ConstellationFigure } from '../ui/ConstellationFigure';
+import { BodyDot } from '../ui/BodyDot';
 import { constellationByOf, SEASON_TEXT } from '../astro/constellations';
 
 interface Props {
@@ -46,7 +47,7 @@ export function BodyPage({ body, now, onFind, onShowOnMap }: Props) {
       <a className="body-page__back" href={hrefFor.explora}><Icon name="back" /> Tots els cossos</a>
 
       <header className="body-page__head">
-        <span className="body-page__swatch" style={{ background: body.color }} aria-hidden="true" />
+        <BodyDot body={body} size="page" />
         <div>
           <h1 id="body-title">{body.name}</h1>
           <p className="muted">

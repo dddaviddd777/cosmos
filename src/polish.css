@@ -217,3 +217,14 @@ a .skymap__cst-name { text-decoration: underline; text-decoration-color: rgba(12
 .tonight__map[open] > summary::before { content: '▾ '; }
 .tonight__map .skymap-wrap { margin: 12px auto 0; }
 .finder__figures { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* Constel·lacions: la icona és la figura, no una bola */
+.cst-avatar { flex: none; display: inline-grid; place-items: center; border-radius: 50%; background: radial-gradient(circle at 50% 40%, #1b2756, #0a1029); border: 1px solid rgba(120, 140, 200, 0.35); }
+.cst-avatar svg { width: 100%; height: 100%; }
+.cst-avatar line { stroke: #8ea6ec; stroke-width: 4; stroke-linecap: round; }
+.cst-avatar circle { fill: #fff; }
+.cst-avatar--row { width: 24px; height: 24px; margin-top: 1px; }
+.cst-avatar--row line { stroke-width: 6; }
+.cst-avatar--page { width: 60px; height: 60px; filter: drop-shadow(0 0 14px rgba(160, 180, 255, 0.18)); }
+.cst-avatar--page line { stroke-width: 2.5; }
+.cst-avatar--page circle { transform-box: fill-box; transform-origin: center; transform: scale(.7); }
