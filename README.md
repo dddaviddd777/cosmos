@@ -50,5 +50,6 @@ npm test   # valida el propagador contra les posicions de JPL Horizons
 - [x] R4 — Mapa 2D petit a l'inici i a les fitxes
 - [x] R5 — Més enllà del sistema solar: 16 estrelles brillants i 10 galàxies, cúmuls i nebuloses visibles sense telescopi (fitxa amb anys llum, com trobar-les, «Aquesta nit» i «Troba'l al cel»)
 - [x] C1 — Constel·lacions: les 23 principals que es veuen des de Catalunya, amb la figura, com trobar-les, què hi ha i la llista a «Aquesta nit» (figures de d3-celestial, BSD-3)
+- [x] C2 — Figures de les constel·lacions al mapa del cel (cercador i nou mapa general a «Aquesta nit»), amb la constel·lació buscada ressaltada
 
 - [ ] Fase 8 (opcional) — Empaquetar com a app de botiga amb Capacitor

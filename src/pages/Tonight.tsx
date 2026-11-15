@@ -5,6 +5,7 @@ import { cardinal, towardsCardinal } from '../sky/sky';
 import { darkStart, farTonight, constelTonight, isDark, moonInfo, skyTonight, sunTimes, type FarEntry, type SkyEntry, type SkyStatus } from '../sky/tonight';
 import type { SkyEye } from '../astro/beyond';
 import { Icon } from '../ui/Icon';
+import { SkyMap } from '../ui/SkyMap';
 
 /** «pel nord-est», «per l’est» */
 const towards = (c: string) => (/^[eo]/.test(c) ? `per l’${c}` : `pel ${c}`);
@@ -133,6 +134,15 @@ export function Tonight({ now, onFind }: Props) {
           )}
         </p>
       </div>
+
+      <details className="box tonight__map">
+        <summary><strong>Mapa del cel {atNow ? 'ara' : when(t, now)}</strong> <span className="muted small">· amb les constel·lacions</span></summary>
+        <SkyMap place={place} now={t} links />
+        <p className="muted small">
+          El centre és just damunt del teu cap i la vora és l’horitzó. Aguanta’l per sobre del cap amb la «N» cap al nord:
+          així coincideix amb el cel. Toca el nom d’una constel·lació per veure’n la fitxa.
+        </p>
+      </details>
 
       <h2>
         {visible.length > 0

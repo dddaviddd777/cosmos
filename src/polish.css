@@ -199,3 +199,20 @@ button:active, .btn:active { transform: translateY(1px); }
 .cst-objects { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 0; }
 .chip-link { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 999px; text-decoration: none; color: var(--text); font-size: .88rem; }
 .chip-link:hover { border-color: var(--accent); }
+
+/* ── Mapa del cel: constel·lacions ── */
+.skymap-wrap { width: min(100%, 420px); }
+.skymap-wrap .skymap { width: 100%; }
+.skymap__cst line { stroke: #4a5f9e; stroke-width: 0.5; stroke-opacity: .75; }
+.skymap__cst circle { fill: #c9d3f2; fill-opacity: .8; }
+.skymap__cst--hi line { stroke: var(--accent); stroke-width: 1; stroke-opacity: 1; }
+.skymap__cst--hi circle { fill: #fff; fill-opacity: 1; }
+.skymap__cst-name { fill: #7f8fc4; font-size: 5.5px; font-style: italic; text-anchor: middle; paint-order: stroke; stroke: #0b1330; stroke-width: 1.6px; }
+.skymap__cst-name--hi { fill: var(--accent); font-size: 7.5px; font-weight: 700; font-style: normal; }
+a .skymap__cst-name { text-decoration: underline; text-decoration-color: rgba(127, 143, 196, .5); }
+.skymap__toggle { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-size: .85rem; color: var(--muted); cursor: pointer; }
+.tonight__map > summary { cursor: pointer; list-style: none; }
+.tonight__map > summary::-webkit-details-marker { display: none; }
+.tonight__map > summary::before { content: '▸ '; color: var(--accent); }
+.tonight__map[open] > summary::before { content: '▾ '; }
+.tonight__map .skymap-wrap { margin: 12px auto 0; }

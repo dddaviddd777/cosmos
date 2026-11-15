@@ -3,7 +3,8 @@ import { bodyById } from '../astro/bodies';
 import { CONSTELLATIONS, constellationByOf } from '../astro/constellations';
 import { BEYOND } from '../astro/beyond';
 import { searchBodies } from '../search/search';
-import { horizontalOf, isCircumpolar } from './sky';
+import { horizontalOf, horizontalOfRaDec, isCircumpolar } from './sky';
+import { constellationsInSky } from './constelSky';
 import { constelTonight } from './tonight';
 
 const BCN = { lat: 41.39, lon: 2.17, name: 'Barcelona' };
@@ -67,5 +68,27 @@ describe('constel·lacions', () => {
     expect(searchBodies('carro')[0]?.id).toBe('cst-uma');
     expect(searchBodies('tres maries')[0]?.id).toBe('cst-ori');
     expect(searchBodies('escorpi').map((b) => b.id)).toContain('cst-sco');
+  });
+
+  it('el mapa del cel situa les estrelles de les figures igual que el càlcul detallat', () => {
+    const t = new Date('2027-01-15T21:00:00Z');
+    const figs = constellationsInSky(t, BCN);
+    expect(figs).toHaveLength(23);
+    for (const f of figs.filter((x) => ['cst-ori', 'cst-uma', 'cst-sco'].includes(x.body.id))) {
+      const fig = f.body.constel!.figure;
+      fig.stars.forEach((s, i) => {
+        const ref = horizontalOfRaDec(s.ra, s.dec, t, BCN);
+        // Per sobre de l'horitzó tots dos apliquen la mateixa refracció
+        if (ref.alt > 1) {
+          expect(Math.abs(f.stars[i].alt - ref.alt)).toBeLessThan(0.05);
+          expect(Math.abs(((f.stars[i].az - ref.az + 540) % 360) - 180)).toBeLessThan(0.1);
+        }
+      });
+    }
+    // Al gener a les 22 h, Orió és ben amunt cap al sud
+    const ori = figs.find((x) => x.body.id === 'cst-ori')!;
+    expect(ori.center.alt).toBeGreaterThan(30);
+    expect(ori.center.az).toBeGreaterThan(120);
+    expect(ori.center.az).toBeLessThan(240);
   });
 });
