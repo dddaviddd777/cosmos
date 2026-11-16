@@ -296,7 +296,7 @@ function FarRow({ e, onFind }: { e: FarEntry; onFind: (id: string) => void }) {
   const sky = e.body.sky!;
   return (
     <li className="sky-row">
-      <span className="body-row__dot" style={{ background: e.body.color }} aria-hidden="true" />
+      <BodyDot body={e.body} />
       <div className="sky-row__main">
         <a href={hrefFor.body(e.body.id)} className="sky-row__name">{e.body.name}</a>
         <p>

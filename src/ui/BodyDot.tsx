@@ -1,6 +1,7 @@
 import type { BodyInfo } from '../astro/bodies';
 import type { Constel } from '../astro/constellations';
 import { projector } from './ConstellationFigure';
+import { DeepIcon } from './DeepIcon';
 
 /** Miniatura de la figura d'una constel·lació, dins d'un quadre de 100 × 100 */
 interface Mini {
@@ -29,9 +30,17 @@ function miniFigure(c: Constel): Mini {
 
 /**
  * Icona d'un cos a les llistes i a la capçalera de la fitxa: una bola del seu color o,
- * per a les constel·lacions, el dibuix de la seva figura.
+ * per a les constel·lacions, el dibuix de la seva figura i, per a galàxies, cúmuls i nebuloses,
+ * una icona del seu tipus.
  */
 export function BodyDot({ body, size = 'row' }: { body: BodyInfo; size?: 'row' | 'page' }) {
+  if (body.kind === 'cel profund' && body.sky) {
+    return (
+      <span className={`deep-avatar deep-avatar--${size}`} aria-hidden="true">
+        <DeepIcon body={body} />
+      </span>
+    );
+  }
   if (!body.constel) {
     return <span className={size === 'page' ? 'body-page__swatch' : 'body-row__dot'} style={{ background: body.color }} aria-hidden="true" />;
   }

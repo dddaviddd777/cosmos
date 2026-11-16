@@ -296,7 +296,7 @@ function ConstelBoxes({ body }: { body: BodyInfo }) {
             <span className="muted small">Fitxes:</span>{' '}
             {objects.map((o) => (
               <a key={o.id} className="chip-link" href={hrefFor.body(o.id)}>
-                <span className="body-row__dot" style={{ background: o.color }} aria-hidden="true" /> {o.name}
+                <BodyDot body={o} /> {o.name}
               </a>
             ))}
           </p>
