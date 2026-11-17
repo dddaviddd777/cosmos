@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { SEASON_TEXT } from '../astro/constellations';
 import { BodyDot } from '../ui/BodyDot';
-import { CATALOG, bodyById, KIND_LABELS, wikipediaUrl, type BodyInfo, type BodyKind } from '../astro/bodies';
+import { CATALOG, bodyById, KIND_LABELS, wikipediaUrl, type BodyInfo, type BodyKind, findVerb } from '../astro/bodies';
 import { formatKm, formatLightTime, formatLy } from '../astro/format';
 import { liveDistance } from '../astro/live';
 import { diameterKm, formatDiameter, meanSunDistanceAu, taglineOf } from '../astro/profile';
@@ -31,7 +31,7 @@ const SORT_LABELS: Record<SortKey, string> = {
 
 const FILTERS: KindFilter[] = ['tots', 'planeta', 'planeta nan', 'satèl·lit', 'asteroide', 'cometa', 'estel', 'cel profund', 'constel·lació'];
 /** Ordre dels grups quan es mostra tot per distància al Sol */
-const GROUP_ORDER: BodyKind[] = ['estrella', 'planeta', 'planeta nan', 'asteroide', 'cometa', 'satèl·lit', 'estel', 'cel profund', 'constel·lació'];
+const GROUP_ORDER: BodyKind[] = ['estrella', 'planeta', 'planeta nan', 'asteroide', 'cometa', 'satèl·lit', 'estació espacial', 'estel', 'cel profund', 'constel·lació'];
 
 interface Props {
   state: ExploreState;
@@ -100,6 +100,7 @@ export function Explore({ state, onChange, now, selectedId, onFind, scrollRef }:
       const d = earthDist.get(b.id);
       return d ? <>{d.approx ? '≈ ' : ''}{formatKm(d.km)} · la <Term id="llum">llum</Term> triga {formatLightTime(d.lightMinutes)}</> : '';
     }
+    if (b.id === 'iss') return 'Fa una volta a la Terra cada 92 minuts';
     if (b.constel) return b.constel.season === 'tot l’any' ? 'Es veu tot l’any' : `Es veu millor ${SEASON_TEXT[b.constel.season].toLowerCase()}`;
     if (sort === 'mida') return `${formatDiameter(diameterKm(b))} de diàmetre`;
     if (b.sky?.distLabel) return `${b.sky.distLabel} ${formatLy(b.sky.ly)}`;
@@ -178,8 +179,8 @@ export function Explore({ state, onChange, now, selectedId, onFind, scrollRef }:
                   </div>
                   <div className="body-row__actions">
                     {b.id !== 'earth' && (
-                      <button onClick={() => onFind(b.id)} aria-label={`Troba ${b.name} al cel`} title="Troba’l al cel">
-                        <Icon name="telescope" /><span> Troba’l</span>
+                      <button onClick={() => onFind(b.id)} aria-label={`Troba ${b.name} al cel`} title={`${findVerb(b)} al cel`}>
+                        <Icon name="telescope" /><span> {findVerb(b)}</span>
                       </button>
                     )}
                     <a href={wikipediaUrl(b)} target="_blank" rel="noopener noreferrer" aria-label={`${b.name} a la Viquipèdia (s’obre en una pestanya nova)`} title="Viquipèdia">

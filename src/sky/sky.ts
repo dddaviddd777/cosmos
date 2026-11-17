@@ -10,6 +10,7 @@ import { bodyById, toBody, type BodyInfo } from '../astro/bodies';
 import { skyPosition } from '../astro/engine';
 import { SMALL_BODIES, smallBodyPosition } from '../astro/kepler';
 import { MILKY_WAY_ID, milkyWayBest } from './milkyway';
+import { ISS_ID, issHorizontal, issState, nextIssSighting } from './iss';
 
 export interface Horizontal {
   /** Graus des del nord, en sentit horari (90 = est) */
@@ -46,6 +47,7 @@ export function horizontalOf(b: BodyInfo, date: Date, place: Place): Horizontal 
   const obs = observerOf(place);
   // La Via Làctia no és un punt: es busca la part més brillant que hi hagi al cel en aquell moment
   if (target.id === MILKY_WAY_ID) return milkyWayBest(date, place);
+  if (target.id === ISS_ID) return issHorizontal(date, place);
   const fixed = fixedRaDec(target);
   if (fixed) return horizontalOfRaDec(fixed.ra, fixed.dec, date, place);
   if (target.body) {
@@ -142,6 +144,15 @@ export function visibilityOf(b: BodyInfo, date: Date, place: Place): Visibility 
   const notes: string[] = [];
   const danger = target.id === 'sun' || (sun.alt > -2 && sunSeparation < 15);
 
+  if (target.id === ISS_ID) {
+    const s = issState(date, place)!;
+    if (pos.alt < 0) notes.push('Ara és sota l’horitzó, a l’altra banda del món: hi tornarà a passar d’aquí a una estona.');
+    else if (daylight === 'dia') notes.push('És de dia: no es veu. Mira la llista de passos a la seva fitxa.');
+    else if (!s.sunlit) notes.push('Ara és a l’ombra de la Terra: no rep llum del Sol i no es veu, encara que sigui sobre l’horitzó.');
+    else notes.push('Ara es veu! Un punt molt brillant que es mou de pressa, sense parpellejar. Segueix-lo amb la vista.');
+    return { pos, sun, sunSeparation, magnitude: pos.alt > 0 && s.sunlit && daylight !== 'dia' ? -3 : undefined, daylight, notes, danger: false };
+  }
+
   if (target.id === 'sun') {
     notes.push('⚠️ No miris mai el Sol directament ni amb prismàtics o telescopi: pots perdre la vista.');
   } else if (danger) {
@@ -191,6 +202,8 @@ export function visibilityOf(b: BodyInfo, date: Date, place: Place): Visibility 
 
 /** Propera sortida per l'horitzó en les pròximes 48 h (cerca per passos + bisecció), o null. */
 export function nextRise(b: BodyInfo, from: Date, place: Place): Date | null {
+  // L'ISS passa en pocs minuts: es busca la propera vegada que es podrà veure
+  if (b.id === ISS_ID) return nextIssSighting(place, from)?.start ?? null;
   const STEP = 10 * 60_000;
   const alt = (t: number) => horizontalOf(b, new Date(t), place)?.alt ?? -90;
   let t0 = from.getTime();

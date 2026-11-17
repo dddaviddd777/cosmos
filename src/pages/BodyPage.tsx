@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
-import { CATALOG, bodyById, KIND_SINGULAR, wikipediaUrl, type BodyInfo } from '../astro/bodies';
+import { CATALOG, bodyById, KIND_SINGULAR, wikipediaUrl, type BodyInfo, findVerb } from '../astro/bodies';
 import { distanceFromSun } from '../astro/engine';
 import { formatAu, formatKm, formatLightTime, formatLy, formatYears } from '../astro/format';
 import { liveDistance } from '../astro/live';
@@ -8,6 +8,9 @@ import { compareWithEarth, taglineOf } from '../astro/profile';
 import { hrefFor } from '../router';
 import { useWikiSummary } from '../search/wiki';
 import { MiniMap } from '../ui/MiniMap';
+import { IssPassList } from '../ui/IssPasses';
+import { ISS_ID, issState, useIssData } from '../sky/iss';
+import { PLACE_PRESETS, useLocation } from '../sky/hooks';
 import { OrbitFacts } from '../ui/OrbitFacts';
 import { Term } from '../ui/Term';
 import { Icon } from '../ui/Icon';
@@ -61,13 +64,13 @@ export function BodyPage({ body, now, onFind, onShowOnMap }: Props) {
       <div className="body-page__actions">
         {body.id !== 'earth' && (
           <button className="primary" onClick={() => onFind(body.id)}>
-            {body.id === 'sun' ? '☀️ On és el Sol ara?' : <><Icon name="telescope" /> {body.constel ? 'Troba-la al cel' : 'Troba’l al cel'}</>}
+            {body.id === 'sun' ? '☀️ On és el Sol ara?' : <><Icon name="telescope" /> {findVerb(body)} al cel</>}
           </button>
         )}
         <a className="btn" href={wiki.status === 'ok' ? wiki.data.url : wikipediaUrl(body)} target="_blank" rel="noopener noreferrer">
           Viquipèdia <Icon name="external" />
         </a>
-        {!body.sky && !body.constel && <button onClick={() => onShowOnMap(body.id)}><Icon name="orbit" /> Al mapa</button>}
+        {!body.sky && !body.constel && body.id !== ISS_ID && <button onClick={() => onShowOnMap(body.id)}><Icon name="orbit" /> Al mapa</button>}
       </div>
 
       {body.constel && <ConstelBoxes body={body} />}
@@ -75,6 +78,8 @@ export function BodyPage({ body, now, onFind, onShowOnMap }: Props) {
       {!body.constel && <section className="box now-box" aria-label="Ara mateix">
         {body.sky ? (
           <FarNow body={body} now={now} />
+        ) : body.id === ISS_ID ? (
+          <IssNow now={now} onFind={() => onFind(body.id)} />
         ) : body.id === 'earth' ? (
           <p>Ets aquí! Ara mateix som a <strong>{formatKm(distanceFromSun(body.body!, now) * 149_597_870.7)}</strong> del Sol ({formatAu(distanceFromSun(body.body!, now))}).</p>
         ) : dist ? (
@@ -102,7 +107,7 @@ export function BodyPage({ body, now, onFind, onShowOnMap }: Props) {
 
       {body.sky && <FindFar body={body} />}
 
-      {!body.sky && (body.id === 'sun' || body.id === 'earth' || dist) && (
+      {!body.sky && body.id !== ISS_ID && (body.id === 'sun' || body.id === 'earth' || dist) && (
         <section className="box where-box" aria-labelledby="where-title">
           <h2 id="where-title">On és al sistema solar</h2>
           <MiniMap now={now} highlight={body} size={300} />
@@ -302,6 +307,30 @@ function ConstelBoxes({ body }: { body: BodyInfo }) {
           </p>
         )}
       </section>
+    </>
+  );
+}
+
+/** L'ISS ara: a quina altura vola i quan es podrà veure des d'on ets */
+function IssNow({ now, onFind }: { now: Date; onFind: () => void }) {
+  const location = useLocation();
+  const place = location.place ?? PLACE_PRESETS[0];
+  const { ready } = useIssData(true);
+  const s = ready ? issState(now, place) : null;
+  return (
+    <>
+      {s && (
+        <>
+          <p className="muted now-box__label">Ara mateix vola a</p>
+          <p className="now-box__big">{Math.round(s.heightKm).toLocaleString('ca')} km d’altura</p>
+          <p className="muted">
+            A {Math.round(s.rangeKm).toLocaleString('ca')} km de {location.place ? 'tu' : place.name}
+            {s.pos.alt > 0 ? ', per sobre de l’horitzó' : ', a l’altra banda de la Terra'}.
+          </p>
+        </>
+      )}
+      <h2 className="iss-passes__title">Quan la podràs veure{location.place ? '' : ` des de ${place.name}`}</h2>
+      <IssPassList place={place} now={now} onFind={onFind} />
     </>
   );
 }

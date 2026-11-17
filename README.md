@@ -54,5 +54,6 @@ npm test   # valida el propagador contra les posicions de JPL Horizons
 - [x] C3 — Figures de les constel·lacions dibuixades sobre la càmera del cercador (amb botó per amagar-les i el calibratge aplicat)
 - [x] Previsió de núvols per a la nit (Open-Meteo), mapa del cel amb control de l'hora i pantalla completa, i calendari del cel (Lluna, pluges d'estels, eclipsis, trobades, oposicions, estacions)
 - [x] Via Làctia: franja al mapa del cel i a la càmera, i fitxa pròpia amb «Troba-la al cel» (apunta a la part més brillant visible)
+- [x] Mapa 3D amb textures reals (Solar System Scope, CC BY 4.0), anells de Saturn i Terra que gira segons l'hora; avisos d'esdeveniments (notificació en obrir l'app i fitxer de calendari .ics amb recordatori); Estació Espacial Internacional (SGP4 amb dades de CelesTrak): passos visibles, fitxa i «Troba-la al cel»
 
 - [ ] Fase 8 (opcional) — Empaquetar com a app de botiga amb Capacitor

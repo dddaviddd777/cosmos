@@ -18,6 +18,7 @@
     "astronomy-engine": "^2.1.19",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "satellite.js": "7.1.0",
     "three": "^0.187.0"
   },
   "devDependencies": {

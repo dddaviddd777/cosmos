@@ -1,5 +1,6 @@
 import { bodyById, type BodyInfo } from '../astro/bodies';
 import { hrefFor } from '../router';
+import { downloadIcs } from '../sky/alerts';
 import type { EventKind, SkyEvent } from '../sky/events';
 import { BodyDot } from './BodyDot';
 
@@ -50,6 +51,11 @@ export function EventCard({ e, now, compact = false }: { e: SkyEvent; now: Date;
           </p>
         )}
         {e.visible === false && <p className="event__look muted">Des d’on ets no es veurà.</p>}
+        {!compact && e.visible !== false && (
+          <button className="event__cal" onClick={() => downloadIcs([e], e.id)} title="Afegeix-lo al calendari del mòbil, amb un recordatori una hora abans">
+            📅 Al calendari
+          </button>
+        )}
         {!compact && bodies.length > 0 && (
           <p className="event__links">
             {bodies.map((b) => (

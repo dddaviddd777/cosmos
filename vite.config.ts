@@ -52,9 +52,23 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,json,woff2}'],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+        // Les textures del mapa 3D no es baixen en instal·lar l'app: només quan s'obre el Mapa
+        globIgnores: ['textures/**'],
+        importScripts: ['sw-notify.js'],
         // Resums i imatges de la Viquipèdia: es mostren al moment des de la memòria cau
         // i s'actualitzen en segon pla; així les fitxes ja vistes funcionen fora de línia.
         runtimeCaching: [
+          {
+            // Òrbita de l'ISS: la més nova; sense connexió, la darrera (com a molt de 7 dies)
+            urlPattern: /^https:\/\/celestrak\.org\/NORAD\/elements\//,
+            handler: 'NetworkFirst',
+            options: { cacheName: 'iss-orbit', networkTimeoutSeconds: 5, expiration: { maxEntries: 4, maxAgeSeconds: 7 * 86_400 } },
+          },
+          {
+            urlPattern: /\/textures\/[^/]+\.(jpg|png)$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'textures', expiration: { maxEntries: 30 } },
+          },
           {
             // Previsió de núvols: sempre la més nova; si no hi ha connexió, la darrera (com a molt de 6 h)
             urlPattern: /^https:\/\/api\.open-meteo\.com\//,

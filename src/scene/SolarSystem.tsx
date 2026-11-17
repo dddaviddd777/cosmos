@@ -1,6 +1,6 @@
 import { useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Vector3, type Group } from 'three';
+import { AdditiveBlending, RingGeometry, Vector3, type Group } from 'three';
 import { Html, Line, OrbitControls, Stars } from '@react-three/drei';
 import { Body } from 'astronomy-engine';
 import { BODIES, HELIO_ORBITERS, bodyById, type BodyInfo } from '../astro/bodies';
@@ -9,6 +9,7 @@ import { CameraRig } from './CameraRig';
 import { SMALL_BODY_RADIUS, SmallBodies } from './SmallBodies';
 import { useBodyScale } from './useBodyScale';
 import { geocentricPosition, heliocentricPosition, sampleOrbit } from '../astro/engine';
+import { SATURN_RING, SURFACES, earthSpin, spinAngle, sunGlow, tiltRad, useSurfaceTexture } from './surfaces';
 import { relToScene, toScene, trueRadius, visualRadius, type ScaleMode } from './scale';
 
 interface Props {
@@ -119,6 +120,8 @@ export function SolarSystem({ date, scale, selectedId, onSelect, focusId, focusN
           selected={selectedId === b.id}
           onSelect={onSelect}
           earth={b.id === 'moon' && scale === 'real' ? positions.get('earth') : undefined}
+          date={date}
+          earthPos={b.id === 'moon' ? positions.get('earth') : undefined}
         />
       ))}
 
@@ -161,12 +164,39 @@ interface BodyProps {
   onSelect: (id: string) => void;
   /** Només per a la Lluna a escala real: posició de la Terra, per amagar-la quan de lluny s'hi superposaria */
   earth?: [number, number, number];
+  date: Date;
+  /** Per a la Lluna: on és la Terra, per girar-li sempre la mateixa cara */
+  earthPos?: [number, number, number];
 }
 
 const tmpEarth = new Vector3();
 
-function CelestialBody({ info, position, radius, scale, selected, onSelect, earth }: BodyProps) {
+/** Amb textura, el color multiplica la imatge: més fosc que el blanc perquè la llum del Sol no la cremi */
+const TEXTURED_TINT = '#9a9a9a';
+
+/** Anell pla amb la textura estirada de la vora interior a l'exterior */
+function makeRing(): RingGeometry {
+  const g = new RingGeometry(SATURN_RING.inner, SATURN_RING.outer, 128, 1);
+  const pos = g.attributes.position;
+  const uv = g.attributes.uv;
+  for (let i = 0; i < pos.count; i++) {
+    const r = Math.hypot(pos.getX(i), pos.getY(i));
+    uv.setXY(i, (r - SATURN_RING.inner) / (SATURN_RING.outer - SATURN_RING.inner), 0.5);
+  }
+  return g;
+}
+
+function CelestialBody({ info, position, radius, scale, selected, onSelect, earth, date, earthPos }: BodyProps) {
   const isSun = info.body === Body.Sun;
+  const surface = SURFACES[info.id];
+  const tex = useSurfaceTexture(surface?.map);
+  const isSaturn = info.body === Body.Saturn;
+  const ringTex = useSurfaceTexture(isSaturn ? SATURN_RING.file : undefined);
+  const ringGeo = useMemo(() => (isSaturn ? makeRing() : null), [isSaturn]);
+  // Gir sobre el seu eix: la Terra, segons l'hora (la cara de dia mira al Sol); la Lluna, cap a la Terra
+  let spin = surface ? spinAngle(surface, date) : 0;
+  if (info.id === 'earth') spin = earthSpin(date, [-position[0], -position[2]]);
+  if (earthPos) spin = Math.atan2(-(earthPos[2] - position[2]), earthPos[0] - position[0]);
   // Grup de radi 1: l'esfera, els anells i l'etiqueta s'escalen junts
   const sized = useBodyScale(scale, info.radiusKm, isSun, radius);
   const outer = useRef<Group>(null);
@@ -187,7 +217,9 @@ function CelestialBody({ info, position, radius, scale, selected, onSelect, eart
   return (
     <group position={position} ref={outer}>
       <group ref={sized}>
+        <group rotation={[surface ? tiltRad(surface) : 0, 0, 0]}>
         <mesh
+          rotation={[0, spin, 0]}
           onClick={(e) => {
             if (!outer.current?.visible) return;
             e.stopPropagation();
@@ -196,18 +228,29 @@ function CelestialBody({ info, position, radius, scale, selected, onSelect, eart
           onPointerOver={() => (document.body.style.cursor = 'pointer')}
           onPointerOut={() => (document.body.style.cursor = '')}
         >
-          <sphereGeometry args={[1, 48, 48]} />
+          <sphereGeometry args={[1, 64, 48]} />
           {isSun ? (
-            <meshBasicMaterial color={info.color} />
+            <meshBasicMaterial key={tex ? 'tex' : 'flat'} color={tex ? '#ffffff' : info.color} map={tex} toneMapped={false} />
           ) : (
-            <meshStandardMaterial color={info.color} roughness={0.9} metalness={0} />
+            <meshStandardMaterial key={tex ? 'tex' : 'flat'} color={tex ? TEXTURED_TINT : info.color} map={tex} roughness={0.9} metalness={0} />
           )}
         </mesh>
-        {info.body === Body.Saturn && (
-          <mesh rotation={[Math.PI / 2 - 0.47, 0, 0]}>
-            <ringGeometry args={[1.3, 2.2, 64]} />
-            <meshBasicMaterial color="#d8c58a" transparent opacity={0.55} side={2} />
-          </mesh>
+        </group>
+        {isSaturn && ringGeo && (
+          <group rotation={[surface ? tiltRad(surface) : 0, 0, 0]}>
+            <mesh geometry={ringGeo} rotation={[-Math.PI / 2, 0, 0]}>
+              {ringTex ? (
+                <meshBasicMaterial map={ringTex} color="#c8c0b0" transparent side={2} depthWrite={false} />
+              ) : (
+                <meshBasicMaterial color="#d8c58a" transparent opacity={0.55} side={2} />
+              )}
+            </mesh>
+          </group>
+        )}
+        {isSun && (
+          <sprite scale={[5.5, 5.5, 1]}>
+            <spriteMaterial map={sunGlow()} blending={AdditiveBlending} depthWrite={false} transparent toneMapped={false} />
+          </sprite>
         )}
         {selected && (
           <mesh rotation={[-Math.PI / 2, 0, 0]}>

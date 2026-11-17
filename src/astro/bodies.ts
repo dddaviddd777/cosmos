@@ -8,7 +8,7 @@ import { Body } from 'astronomy-engine';
 import { BEYOND, type FixedSky } from './beyond';
 import { CONSTELLATIONS, type Constel } from './constellations';
 
-export type BodyKind = 'estrella' | 'planeta' | 'planeta nan' | 'satèl·lit' | 'asteroide' | 'cometa' | 'estel' | 'cel profund' | 'constel·lació';
+export type BodyKind = 'estrella' | 'planeta' | 'planeta nan' | 'satèl·lit' | 'asteroide' | 'cometa' | 'estel' | 'cel profund' | 'constel·lació' | 'estació espacial';
 
 export const KIND_LABELS: Record<BodyKind, string> = {
   estrella: 'Estrella',
@@ -20,6 +20,7 @@ export const KIND_LABELS: Record<BodyKind, string> = {
   estel: 'Estrelles',
   'cel profund': 'Galàxies i cúmuls',
   'constel·lació': 'Constel·lacions',
+  'estació espacial': 'Estacions espacials',
 };
 
 export const KIND_SINGULAR: Record<BodyKind, string> = {
@@ -32,6 +33,7 @@ export const KIND_SINGULAR: Record<BodyKind, string> = {
   estel: 'Estrella',
   'cel profund': 'Objecte del cel profund',
   'constel·lació': 'Constel·lació',
+  'estació espacial': 'Estació espacial',
 };
 
 export interface Fact {
@@ -74,6 +76,14 @@ export const CATALOG: BodyInfo[] = [
     radiusKm: 695_700, color: '#ffc94a', wikiCa: 'Sol', wikiEn: 'Sun',
     intro: 'L’estrella al centre del sistema solar. Conté el 99,8 % de tota la massa del sistema i la seva llum i calor fan possible la vida a la Terra.',
     facts: [f('Diàmetre', '1,39 milions de km (109 Terres)'), f('Temperatura de la superfície', '≈ 5.500 °C'), f('Edat', '≈ 4.600 milions d’anys'), f('Tipus', 'Nana groga (G2V)')],
+  },
+  // ── Estació espacial: posició amb SGP4 i les dades de CelesTrak (src/sky/iss.ts) ──
+  {
+    id: 'iss', name: 'Estació Espacial Internacional', kind: 'estació espacial',
+    aliases: ['ISS', 'EEI', 'International Space Station', 'Estación Espacial Internacional', 'estació espacial', 'satèl·lit artificial', 'astronautes'],
+    radiusKm: 0.0545, color: '#e8eef8', wikiCa: 'Estació Espacial Internacional', wikiEn: 'International Space Station',
+    intro: 'Un laboratori on viuen astronautes des de l’any 2000. Fa la volta a la Terra cada hora i mitja, a uns 400 km d’altura. No fa llum pròpia: la veus perquè els panells solars reflecteixen la llum del Sol. Sembla un estel molt brillant que creua el cel en pocs minuts, sense parpellejar. Només es veu poc després de fer-se fosc o poc abans de clarejar: a terra ja és de nit, però allà dalt encara hi toca el Sol.',
+    facts: [f('Altura', 'Uns 400 km'), f('Velocitat', '≈ 27.600 km/h'), f('Una volta a la Terra', '≈ 92 minuts'), f('Tripulació', 'Normalment 7 persones'), f('Habitada des del', '2 de novembre del 2000'), f('Mida', '109 × 73 m, com un camp de futbol')],
   },
   // ── Planetes ──────────────────────────────────────────────
   {
@@ -330,9 +340,17 @@ export function withArticle(b: BodyInfo): string {
   if (b.id === 'moon') return 'la Lluna';
   if (b.id === 'earth') return 'la Terra';
   if (b.id === 'milky-way') return 'la Via Làctia';
+  if (b.id === 'iss') return 'l’Estació Espacial Internacional';
   if (b.kind === 'cometa') return b.name.startsWith('Cometa ') ? `el c${b.name.slice(1)}` : `el cometa ${b.name}`;
   return b.name;
 }
+
+/** Femení? Per dir «Troba-la» o «Troba’l» */
+export const isFeminine = (b: BodyInfo): boolean =>
+  !!b.constel || ['moon', 'earth', 'iss', 'milky-way'].includes(b.id) || /^(Galàxia|Nebulosa)/.test(b.name);
+
+/** «Troba-la» o «Troba’l» */
+export const findVerb = (b: BodyInfo): string => (isFeminine(b) ? 'Troba-la' : 'Troba’l');
 
 /** «a» + nom amb les contraccions del català: «al Sol», «a la Lluna», «a Mart». */
 export function toBody(b: BodyInfo): string {

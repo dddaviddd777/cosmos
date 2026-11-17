@@ -10,6 +10,7 @@ import { SMALL_BODIES } from './kepler';
 
 /** Frase curta per a la llista (com un subtítol) */
 export const TAGLINES: Record<string, string> = {
+  iss: 'Una casa a l’espai que passa per sobre del teu cap',
   sun: 'La nostra estrella: hi cabrien 1,3 milions de Terres',
   mercury: 'El més petit i el més proper al Sol',
   venus: 'L’estel del vespre, un infern sota els núvols',
@@ -76,6 +77,7 @@ const PLANET_A: Partial<Record<Body, number>> = {
 /** Distància mitjana al Sol (UA). Les llunes, la del seu planeta; el Sol, 0. */
 export function meanSunDistanceAu(b: BodyInfo): number {
   if (b.id === 'sun') return 0;
+  if (b.id === 'iss') return 1;
   if (b.sky) return b.sky.ly * 63_241.077;
   if (b.parent) return meanSunDistanceAu(bodyById(b.parent)!);
   const small = SMALL_BODIES[b.id];
@@ -114,6 +116,14 @@ export interface Comparison {
 export function compareWithEarth(b: BodyInfo): Comparison[] {
   if (b.id === 'earth' || b.constel) return [];
   if (b.sky) return compareFar(b);
+  if (b.id === 'iss') {
+    return [
+      { label: 'Mida', text: 'Com un camp de futbol: 109 m d’un extrem a l’altre dels panells solars' },
+      { label: 'Velocitat', text: 'Uns 7,7 km cada segon: aniria de Barcelona a Girona en 13 segons' },
+      { label: 'Altura', text: 'Uns 400 km: com de Barcelona a València, però cap amunt' },
+      { label: 'Un dia a bord', text: 'Fa 16 voltes a la Terra: els astronautes veuen 16 sortides de sol cada dia' },
+    ];
+  }
   const out: Comparison[] = [];
 
   // Mida

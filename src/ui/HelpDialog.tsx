@@ -56,6 +56,9 @@ export function HelpDialog({ welcome, onClose }: Props) {
           <ul>
             <li>Posicions del Sol, la Lluna i els planetes: <a href="https://github.com/cosinekitty/astronomy" target="_blank" rel="noopener noreferrer">Astronomy Engine</a>, amb una precisió d’uns segons d’arc.</li>
             <li>Òrbites d’asteroides, cometes i planetes nans: <a href="https://ssd.jpl.nasa.gov/horizons/" target="_blank" rel="noopener noreferrer">NASA/JPL Horizons</a> i la base de dades de cossos petits del JPL.</li>
+            <li>Òrbita de l’Estació Espacial: <a href="https://celestrak.org/" target="_blank" rel="noopener noreferrer">CelesTrak</a>, calculada amb <a href="https://github.com/shashwatak/satellite-js" target="_blank" rel="noopener noreferrer">satellite.js</a> (SGP4).</li>
+            <li>Textures dels planetes del mapa 3D: <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener noreferrer">Solar System Scope</a>, sota llicència CC BY 4.0 (a partir d’imatges de la NASA).</li>
+            <li>Figures de les constel·lacions: <a href="https://github.com/ofrohn/d3-celestial" target="_blank" rel="noopener noreferrer">d3-celestial</a> (BSD-3). Previsió de núvols: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>.</li>
             <li>Textos i imatges de les fitxes: <a href="https://ca.wikipedia.org/" target="_blank" rel="noopener noreferrer">Viquipèdia</a>, sota llicència CC BY-SA.</li>
           </ul>
           <p className="muted">La ubicació i la càmera només es fan servir dins del teu dispositiu: no s’envien enlloc.</p>

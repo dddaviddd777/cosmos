@@ -1,3 +1,4 @@
+import { findVerb } from '../astro/bodies';
 import { useMemo, useState } from 'react';
 import { hrefFor } from '../router';
 import { PLACE_PRESETS, useLocation } from '../sky/hooks';
@@ -8,6 +9,7 @@ import { Icon } from '../ui/Icon';
 import { SkyMapExplorer } from '../ui/SkyMapExplorer';
 import { BodyDot } from '../ui/BodyDot';
 import { NightWeather } from '../ui/NightWeather';
+import { IssIcon, IssPassList } from '../ui/IssPasses';
 import { EventCard } from '../ui/EventCard';
 import { skyEvents } from '../sky/events';
 import type { Place } from '../sky/sky';
@@ -143,6 +145,7 @@ export function Tonight({ now, onFind }: Props) {
       {(darkNow || dark) && <NightWeather place={place} from={darkNow ? t : dark!} to={sun.rise} />}
 
       <UpcomingEvents now={now} place={place} nightEnd={sun.rise} />
+      <IssTonight now={now} place={place} onFind={() => onFind('iss')} />
 
       <details className="box tonight__map">
         <summary><strong>Mapa del cel {atNow ? 'ara' : when(t, now)}</strong> <span className="muted small">· amb les constel·lacions</span></summary>
@@ -288,7 +291,7 @@ function SkyRow({ e, from, dawn, onFind }: { e: SkyEntry; from: Date; dawn: Date
       </div>
       {e.status !== 'sol' && (
         <button className="sky-row__find" onClick={() => onFind(e.body.id)} aria-label={`Troba ${e.body.name} al cel`}>
-          <Icon name="telescope" /><span> Troba’l</span>
+          <Icon name="telescope" /><span> {findVerb(e.body)}</span>
         </button>
       )}
     </li>
@@ -318,7 +321,7 @@ function FarRow({ e, onFind }: { e: FarEntry; onFind: (id: string) => void }) {
         </p>
       </div>
       <button className="sky-row__find" onClick={() => onFind(e.body.id)} aria-label={`Troba ${e.body.name} al cel`}>
-        <Icon name="telescope" /><span> Troba’l</span>
+        <Icon name="telescope" /><span> {findVerb(e.body)}</span>
       </button>
     </li>
   );
@@ -368,6 +371,19 @@ function UpcomingEvents({ now, place, nightEnd }: { now: Date; place: Place; nig
         {next.map((e) => <EventCard key={e.id} e={e} now={now} compact />)}
       </ul>
       <a className="upcoming__all" href={hrefFor.events}>Tot el calendari del cel →</a>
+    </section>
+  );
+}
+
+/** L'Estació Espacial: els propers passos visibles (dos dies) */
+function IssTonight({ now, place, onFind }: { now: Date; place: Place; onFind: () => void }) {
+  return (
+    <section className="box iss-box" aria-labelledby="iss-title">
+      <h2 id="iss-title">
+        <span className="deep-avatar deep-avatar--row" aria-hidden="true"><IssIcon /></span> Estació Espacial Internacional
+      </h2>
+      <IssPassList place={place} now={now} days={3} limit={3} onFind={onFind} compact />
+      <a className="upcoming__all" href={hrefFor.body('iss')}>Què és i tots els passos →</a>
     </section>
   );
 }

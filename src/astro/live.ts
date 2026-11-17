@@ -9,6 +9,7 @@ import { Body, C_AUDAY, GeoVector, JupiterMoons, KM_PER_AU } from 'astronomy-eng
 import { bodyById, type BodyInfo } from './bodies';
 import { distanceFromEarth, heliocentricPosition, type EarthDistance } from './engine';
 import { SMALL_BODIES, closeApproachVector, smallBodyPosition } from './kepler';
+import { ISS_ID, issState } from '../sky/iss';
 
 export interface LiveDistance extends EarthDistance {
   /** true si és la distància del planeta pare (aproximada) */
@@ -25,6 +26,11 @@ export const AU_PER_LY = 63_241.077;
 
 export function liveDistance(b: BodyInfo, date: Date): LiveDistance | null {
   if (b.sky) return { ...fromAu(b.sky.ly * AU_PER_LY), approx: false };
+  // L'ISS: la seva altura sobre el terra (la distància depèn de cap on la miris)
+  if (b.id === ISS_ID) {
+    const s = issState(date, { lat: 0, lon: 0 });
+    return s ? { ...fromAu(s.heightKm / KM_PER_AU), approx: false } : null;
+  }
   if (b.body) return { ...distanceFromEarth(b.body, date), approx: false };
 
   const small = SMALL_BODIES[b.id];

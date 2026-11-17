@@ -21,7 +21,7 @@ export const PLACE_PRESETS: Place[] = [
 
 const PLACE_KEY = 'cosmos.place';
 
-function loadPlace(): Place | null {
+export function loadPlace(): Place | null {
   try {
     const p = JSON.parse(localStorage.getItem(PLACE_KEY) ?? 'null');
     return p && typeof p.lat === 'number' && typeof p.lon === 'number' ? p : null;

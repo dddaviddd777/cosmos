@@ -5,6 +5,7 @@ import { Explore, INITIAL_EXPLORE, type ExploreState } from './pages/Explore';
 import { initialMapState, MapPage, sceneIdFor, type MapState } from './pages/MapPage';
 import { Tonight } from './pages/Tonight';
 import { Events } from './pages/Events';
+import { checkAlerts } from './sky/alerts';
 import { Understand } from './pages/Understand';
 import { hrefFor, navigate, useNow, useRoute, type Tab } from './router';
 import { HelpDialog } from './ui/HelpDialog';
@@ -25,6 +26,11 @@ const TABS: { tab: Tab; href: string; icon: IconName; label: string }[] = [
 export default function App() {
   const route = useRoute();
   const now = useNow(1000);
+  // Avisos d'esdeveniments: en obrir l'app i, si es queda oberta, cada hora
+  const hourKey = Math.floor(now.getTime() / 3_600_000);
+  useEffect(() => {
+    checkAlerts().catch(() => {});
+  }, [hourKey]);
   const [night, setNight] = useNightMode();
   const [welcomed, setWelcomed] = useStoredFlag('cosmos.welcomed', false);
   const [helpOpen, setHelpOpen] = useState(() => !welcomed);

@@ -2,6 +2,7 @@ import type { BodyInfo } from '../astro/bodies';
 import type { Constel } from '../astro/constellations';
 import { projector } from './ConstellationFigure';
 import { DeepIcon } from './DeepIcon';
+import { IssIcon } from './IssPasses';
 
 /** Miniatura de la figura d'una constel·lació, dins d'un quadre de 100 × 100 */
 interface Mini {
@@ -34,6 +35,13 @@ function miniFigure(c: Constel): Mini {
  * una icona del seu tipus.
  */
 export function BodyDot({ body, size = 'row' }: { body: BodyInfo; size?: 'row' | 'page' }) {
+  if (body.kind === 'estació espacial') {
+    return (
+      <span className={`deep-avatar deep-avatar--${size}`} aria-hidden="true">
+        <IssIcon />
+      </span>
+    );
+  }
   if (body.kind === 'cel profund' && body.sky) {
     return (
       <span className={`deep-avatar deep-avatar--${size}`} aria-hidden="true">

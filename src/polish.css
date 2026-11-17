@@ -295,3 +295,21 @@ body.no-scroll { overflow: hidden; }
 .events-page .chips { margin: 12px 0 4px; flex-wrap: wrap; }
 .events-page__month { margin-top: 22px; }
 .events-page .body-page__back { display: inline-flex; align-items: center; gap: 2px; }
+
+/* Avisos d'esdeveniments */
+.alerts-box { margin: 14px 0 18px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: rgba(120, 140, 220, 0.06); }
+.alerts-box h2 { margin: 0 0 8px; font-size: 1rem; }
+.alerts-box__toggle { display: flex; gap: 8px; align-items: center; font-weight: 600; }
+.alerts-box__note { margin: 4px 0 10px; font-size: .85rem; }
+.alerts-box__note:last-child { margin-bottom: 0; }
+.alerts-box__cal, .event__cal { display: inline-flex; align-items: center; gap: 6px; }
+.event__cal { margin-top: 8px; padding: 4px 10px; font-size: .82rem; }
+
+/* Estació Espacial */
+.iss-passes__title { margin: 14px 0 6px; font-size: 1rem; }
+.iss-passes__list { margin: 0 0 8px; padding-left: 18px; }
+.iss-passes__list li { margin: 6px 0; line-height: 1.45; }
+.iss-passes__list--compact li { font-size: .92rem; }
+.iss-passes__now { padding: 8px 10px; border-radius: 10px; background: rgba(255, 201, 74, 0.1); border: 1px solid rgba(255, 201, 74, 0.35); }
+.iss-passes__now button { margin-top: 6px; }
+.iss-box h2 { display: flex; align-items: center; gap: 8px; }
