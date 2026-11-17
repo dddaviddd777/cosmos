@@ -3,6 +3,7 @@ import { BODIES, type BodyInfo } from '../astro/bodies';
 import { constellationByOf } from '../astro/constellations';
 import { hrefFor } from '../router';
 import { constellationsInSky } from '../sky/constelSky';
+import { bandQuads, milkyWayInSky } from '../sky/milkyway';
 import { horizontalOf, type Horizontal, type Place } from '../sky/sky';
 import { useStoredFlag } from './prefs';
 
@@ -55,6 +56,7 @@ export function SkyMap({ target, place, now, links = false }: Props) {
     return list;
   }, [minute, place, target]);
 
+  const band = useMemo(() => bandQuads(milkyWayInSky(new Date(minute * 60_000), place)), [minute, place]);
   const figures = useMemo(() => (showCst ? constellationsInSky(new Date(minute * 60_000), place) : []), [minute, place, showCst]);
 
   // La constel·lació a ressaltar: l'objectiu mateix o la de l'estrella que es busca
@@ -72,6 +74,9 @@ export function SkyMap({ target, place, now, links = false }: Props) {
           <clipPath id="sky-clip">
             <circle r={R} />
           </clipPath>
+          <filter id="mw-blur" x="-10%" y="-10%" width="120%" height="120%">
+            <feGaussianBlur stdDeviation="2.2" />
+          </filter>
         </defs>
         <circle r={R} fill="url(#sky-bg)" stroke="#5a72c0" strokeWidth="1" />
         {[30, 60].map((alt) => (
@@ -87,6 +92,19 @@ export function SkyMap({ target, place, now, links = false }: Props) {
         <text x="3" y={-((90 - 30) / 90) * R - 1} className="skymap__alt">30°</text>
 
         {/* Constel·lacions: línies i estrelles; la ressaltada, a sobre de les altres */}
+        {/* La Via Làctia: una franja de llum difusa */}
+        <g clipPath="url(#sky-clip)">
+          <g filter="url(#mw-blur)" aria-hidden="true">
+            {band.map((q, i) => (
+              <path
+                key={i}
+                d={`M${q.pts.map((p) => xy(p).map((v) => v.toFixed(1)).join(' ')).join('L')}Z`}
+                fill="#c9d4ff"
+                fillOpacity={q.alpha}
+              />
+            ))}
+          </g>
+        </g>
         <g clipPath="url(#sky-clip)">
           {[...figures].sort((a, b) => Number(a.body.id === highlight) - Number(b.body.id === highlight)).map((f) => {
             const hi = f.body.id === highlight;

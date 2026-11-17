@@ -29,6 +29,10 @@ export interface FixedSky {
   eye: SkyEye;
   /** Per als molt llunyans: què passava a la Terra quan en va sortir la llum */
   past?: string;
+  /** Text en lloc de «És a» (p. ex. «El centre és a» per a la Via Làctia) */
+  distLabel?: string;
+  /** No té una magnitud única (objectes molt estesos) */
+  noMag?: boolean;
 }
 
 const KM_PER_LY = 9.4607e12;
@@ -37,10 +41,10 @@ const SUN_R = 695_700;
 const f = (label: string, value: string): Fact => ({ label, value });
 
 /** Dades comunes a tots: distància, constel·lació i magnitud */
-const baseFacts = (s: { ly: number; constellation: string; mag: number }): Fact[] => [
+const baseFacts = (s: { ly: number; constellation: string; mag: number; noMag?: boolean }): Fact[] => [
   f('Distància', formatLy(s.ly)),
   f('Constel·lació', s.constellation.replace(/^del /, '').replace(/^de la /, '').replace(/^de l’/, '').replace(/^d’/, '').replace(/^dels /, '')),
-  f('Magnitud', s.mag.toLocaleString('ca', { maximumFractionDigits: 2 })),
+  ...(s.noMag ? [] : [f('Magnitud', s.mag.toLocaleString('ca', { maximumFractionDigits: 2 }))]),
 ];
 
 function star(
@@ -192,6 +196,17 @@ export const BEYOND: BodyInfo[] = [
   }, 152_000, '#c9c2ff', 'Galàxia d\'Andròmeda', 'Andromeda Galaxy',
   'És una galàxia com la nostra, amb un bilió d’estrelles, i la més gran del nostre veïnat. S’acosta a la Via Làctia a 110 km per segon: d’aquí a uns 4.500 milions d’anys les dues galàxies xocaran i es fusionaran.',
   [f('Estrelles', 'Un bilió (un milió de milions)'), f('Velocitat', 'S’acosta a 110 km/s')]),
+
+  deep('milky-way', 'Via Làctia', ['Milky Way', 'Vía Láctea', 'Camí de Sant Jaume', 'la nostra galàxia', 'Galàxia'], {
+    // Direcció del centre de la galàxia; «Troba-la» apunta a la part més brillant que es vegi en cada moment
+    ra: 17.761, dec: -29.008, mag: 4.5, ly: 26_000, constellation: 'del Sagitari', type: 'La nostra galàxia', eye: 'cel fosc',
+    noMag: true, distLabel: 'El centre és a',
+    tagline: 'La nostra galàxia, vista des de dins',
+    hint: 'Només des d’un lloc fosc i sense Lluna: una franja blanquinosa, com un núvol llarg, que travessa tot el cel. A l’estiu és espectacular i passa per sobre del cap, del Cigne fins al Sagitari, on és més brillant. A l’hivern és més feble i passa per Cassiopea, Perseu, el Cotxer i Orió. Des de ciutat no es veu.',
+    past: 'en plena era glacial, quan els humans pintaven les coves',
+  }, 100_000, '#d6dcff', 'Via Làctia', 'Milky Way',
+  'Vivim dins d’una galàxia espiral d’uns 100.000 anys llum d’amplada, amb centenars de milers de milions d’estrelles. Com que la veiem des de dins, el disc on som apareix com una franja de llum que dona la volta a tot el cel: és la llum de milions d’estrelles massa febles per veure-les una a una. Les taques fosques que la parteixen són núvols de pols. El Sol és a uns 26.000 anys llum del centre, en un dels braços, i tarda uns 230 milions d’anys a fer-hi una volta.',
+  [f('Estrelles', 'Entre 100.000 i 400.000 milions'), f('Una volta del Sol', 'Uns 230 milions d’anys'), f('Nom popular', 'Camí de Sant Jaume')]),
 
   deep('m33', 'Galàxia del Triangle', ['Triangulum', 'M33', 'Messier 33', 'NGC 598'], {
     ra: 1.5641, dec: 30.66, mag: 5.7, ly: 2.73e6, constellation: 'del Triangle', type: 'Galàxia espiral', eye: 'prismàtics',

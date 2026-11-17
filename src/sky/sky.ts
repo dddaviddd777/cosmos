@@ -9,6 +9,7 @@ import {
 import { bodyById, toBody, type BodyInfo } from '../astro/bodies';
 import { skyPosition } from '../astro/engine';
 import { SMALL_BODIES, smallBodyPosition } from '../astro/kepler';
+import { MILKY_WAY_ID, milkyWayBest } from './milkyway';
 
 export interface Horizontal {
   /** Graus des del nord, en sentit horari (90 = est) */
@@ -43,6 +44,8 @@ export function skyTargetOf(b: BodyInfo): BodyInfo {
 export function horizontalOf(b: BodyInfo, date: Date, place: Place): Horizontal | null {
   const target = skyTargetOf(b);
   const obs = observerOf(place);
+  // La Via Làctia no és un punt: es busca la part més brillant que hi hagi al cel en aquell moment
+  if (target.id === MILKY_WAY_ID) return milkyWayBest(date, place);
   const fixed = fixedRaDec(target);
   if (fixed) return horizontalOfRaDec(fixed.ra, fixed.dec, date, place);
   if (target.body) {

@@ -4,6 +4,7 @@
  */
 import { project, type Mat3, type Projection } from '../sky/orientation';
 import type { SkyFigure } from '../sky/constelSky';
+import type { BandQuad } from '../sky/milkyway';
 
 export interface ArParams {
   R: Mat3;
@@ -25,7 +26,7 @@ const MAX_OFF = 75;
 
 const ok = (p: Projection) => p.front && p.offAngle < MAX_OFF;
 
-export function drawFigures(canvas: HTMLCanvasElement, figures: SkyFigure[], p: ArParams): void {
+export function drawFigures(canvas: HTMLCanvasElement, figures: SkyFigure[], p: ArParams, band: BandQuad[] = []): void {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const [cw, ch] = [Math.round(p.w * dpr), Math.round(p.h * dpr)];
   if (canvas.width !== cw || canvas.height !== ch) {
@@ -37,6 +38,21 @@ export function drawFigures(canvas: HTMLCanvasElement, figures: SkyFigure[], p: 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, p.w, p.h);
   ctx.lineCap = 'round';
+
+  // La Via Làctia, difuminada, per sota de les figures
+  if (band.length) {
+    ctx.filter = 'blur(8px)';
+    for (const q of band) {
+      const pr = q.pts.map((h) => project({ az: h.az + p.daz, alt: h.alt + p.dalt }, p.R, p.screenAngle, p.focal, p.w, p.h));
+      if (!pr.every(ok)) continue;
+      ctx.fillStyle = `rgba(201, 212, 255, ${q.alpha})`;
+      ctx.beginPath();
+      pr.forEach((q2, k) => (k ? ctx.lineTo(q2.x, q2.y) : ctx.moveTo(q2.x, q2.y)));
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.filter = 'none';
+  }
 
   // La ressaltada, l'última: queda per sobre
   const ordered = [...figures].sort((a, b) => Number(a.body.id === p.highlight) - Number(b.body.id === p.highlight));

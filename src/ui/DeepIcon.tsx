@@ -30,7 +30,7 @@ export function DeepIcon({ body }: { body: BodyInfo }) {
   const c = body.color;
 
   let art: React.ReactNode;
-  if (type.includes('galàxia espiral')) {
+  if (type.includes('galàxia espiral') || type.includes('nostra galàxia')) {
     art = (
       <>
         <defs>

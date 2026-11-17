@@ -4,6 +4,7 @@
 import { Body, Illumination, MoonPhase, SearchRiseSet } from 'astronomy-engine';
 import { bodyById, CATALOG, type BodyInfo } from '../astro/bodies';
 import { horizontalOf, maxAltitude, nextRise, observerOf, visibilityOf, type Horizontal, type Place } from './sky';
+import { MILKY_WAY_ID } from './milkyway';
 
 /** Cossos que es poden veure sense telescopi (o gairebé) */
 export const TONIGHT_IDS = ['moon', 'venus', 'jupiter', 'mars', 'saturn', 'mercury', 'uranus', 'neptune'];
@@ -110,7 +111,8 @@ export function sunTimes(t: Date, place: Place) {
 }
 
 /** Estrelles i objectes de fora del sistema solar */
-export const FAR_BODIES = CATALOG.filter((b) => b.sky);
+// La Via Làctia no és un punt: té la seva pròpia franja al mapa
+export const FAR_BODIES = CATALOG.filter((b) => b.sky && b.id !== MILKY_WAY_ID);
 
 export interface FarEntry {
   body: BodyInfo;

@@ -185,7 +185,7 @@ function compareFar(b: BodyInfo): Comparison[] {
     out.push({ label: 'Mida', text });
   } else {
     const ly = (b.radiusKm * 2) / KM_PER_LY;
-    out.push({ label: 'Mida', text: `Uns ${formatLy(ly)} d’un extrem a l’altre: la llum triga ${formatYears(ly)} a travessar-${b.name.startsWith('Galàxia') || b.name.startsWith('Nebulosa') ? 'la' : 'lo'}` });
+    out.push({ label: 'Mida', text: `Uns ${formatLy(ly)} d’un extrem a l’altre: la llum triga ${formatYears(ly)} a travessar-${/^(Galàxia|Nebulosa|Via)/.test(b.name) ? 'la' : 'lo'}` });
   }
   const sunTimes = (sky.ly * KM_PER_LY) / 1.496e8;
   out.push({ label: 'Distància', text: `${bigCount(sunTimes, 'vegades')} més lluny que el Sol` });

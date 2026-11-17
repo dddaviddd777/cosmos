@@ -102,6 +102,7 @@ export function Explore({ state, onChange, now, selectedId, onFind, scrollRef }:
     }
     if (b.constel) return b.constel.season === 'tot l’any' ? 'Es veu tot l’any' : `Es veu millor ${SEASON_TEXT[b.constel.season].toLowerCase()}`;
     if (sort === 'mida') return `${formatDiameter(diameterKm(b))} de diàmetre`;
+    if (b.sky?.distLabel) return `${b.sky.distLabel} ${formatLy(b.sky.ly)}`;
     if (b.sky) return `${formatLy(b.sky.ly)} · constel·lació ${b.sky.constellation}`;
     if (parent) return `Lluna de ${parent.name}`;
     if (b.id === 'sun') return 'Al centre';

@@ -198,7 +198,7 @@ function FarNow({ body, now }: { body: BodyInfo; now: Date }) {
         : sky.past ? <>, {sky.past}.</> : '.';
   return (
     <>
-      <p className="muted now-box__label">És a</p>
+      <p className="muted now-box__label">{sky.distLabel ?? 'És a'}</p>
       <p className="now-box__big">{formatLy(sky.ly)}</p>
       <p className="muted">
         Un <Term id="any-llum">any llum</Term> és la distància que fa la llum en un any: uns 9,5 bilions de km. En total, {formatKm(km)}.

@@ -11,6 +11,7 @@ import { SkyMap } from './SkyMap';
 import { clearFigures, drawFigures } from './arFigures';
 import { useStoredFlag } from './prefs';
 import { constellationsInSky, type SkyFigure } from '../sky/constelSky';
+import { bandQuads, milkyWayInSky, type BandQuad } from '../sky/milkyway';
 import { constellationByOf } from '../astro/constellations';
 import { useDialog } from './useDialog';
 
@@ -116,9 +117,13 @@ export function SkyFinder({ body, onClose, night, onNight }: Props) {
     () => (cameraMode && showCst && place ? constellationsInSky(new Date(minute * 60_000), place) : []),
     [cameraMode, showCst, place, minute],
   );
+  const band = useMemo<BandQuad[]>(
+    () => (cameraMode && showCst && place ? bandQuads(milkyWayInSky(new Date(minute * 60_000), place)) : []),
+    [cameraMode, showCst, place, minute],
+  );
   const highlight = target.constel ? target.id : target.sky ? constellationByOf(target.sky.constellation)?.id : undefined;
-  const figRef = useRef({ figures, calib, highlight });
-  figRef.current = { figures, calib, highlight };
+  const figRef = useRef({ figures, band, calib, highlight });
+  figRef.current = { figures, band, calib, highlight };
   useEffect(() => {
     if (!showCst) clearFigures(canvas.current);
   }, [showCst]);
@@ -146,7 +151,7 @@ export function SkyFinder({ body, onClose, night, onNight }: Props) {
           drawFigures(canvas.current, fig.figures, {
             R, screenAngle: sa, focal: f, w, h, daz: fig.calib.daz, dalt: fig.calib.dalt, highlight: fig.highlight,
             noLabel: target.constel ? target.id : undefined,
-          });
+          }, fig.band);
         }
       }
       raf = requestAnimationFrame(loop);

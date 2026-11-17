@@ -329,6 +329,7 @@ export function withArticle(b: BodyInfo): string {
   if (b.id === 'sun') return 'el Sol';
   if (b.id === 'moon') return 'la Lluna';
   if (b.id === 'earth') return 'la Terra';
+  if (b.id === 'milky-way') return 'la Via Làctia';
   if (b.kind === 'cometa') return b.name.startsWith('Cometa ') ? `el c${b.name.slice(1)}` : `el cometa ${b.name}`;
   return b.name;
 }
