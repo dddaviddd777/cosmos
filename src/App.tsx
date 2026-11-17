@@ -4,6 +4,7 @@ import { BodyPage } from './pages/BodyPage';
 import { Explore, INITIAL_EXPLORE, type ExploreState } from './pages/Explore';
 import { initialMapState, MapPage, sceneIdFor, type MapState } from './pages/MapPage';
 import { Tonight } from './pages/Tonight';
+import { Events } from './pages/Events';
 import { Understand } from './pages/Understand';
 import { hrefFor, navigate, useNow, useRoute, type Tab } from './router';
 import { HelpDialog } from './ui/HelpDialog';
@@ -116,7 +117,7 @@ export default function App() {
             )}
           </div>
         )}
-        {route.tab === 'nit' && <Tonight now={now} onFind={setFinderId} />}
+        {route.tab === 'nit' && (route.id === 'esdeveniments' ? <Events now={now} /> : <Tonight now={now} onFind={setFinderId} />)}
         {route.tab === 'entendre' && <Understand now={now} section={route.id} />}
         {mapUsed && (
           <div className="map-host" hidden={!onMap}>

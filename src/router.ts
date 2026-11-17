@@ -8,7 +8,7 @@ export type Tab = 'explora' | 'nit' | 'entendre' | 'mapa';
 
 export interface Route {
   tab: Tab;
-  /** Cos obert a la fitxa (Explora) o secció d'«Entendre» */
+  /** Cos obert a la fitxa (Explora), secció d'«Entendre» o «esdeveniments» (Aquesta nit) */
   id?: string;
 }
 
@@ -18,7 +18,7 @@ export function parseHash(hash: string): Route {
     case 'cos':
       return { tab: 'explora', id: parts[1] };
     case 'aquesta-nit':
-      return { tab: 'nit' };
+      return { tab: 'nit', id: parts[1] };
     case 'entendre':
       return { tab: 'entendre', id: parts[1] };
     case 'mapa':
@@ -32,6 +32,7 @@ export const hrefFor = {
   explora: '#/',
   body: (id: string) => `#/cos/${encodeURIComponent(id)}`,
   nit: '#/aquesta-nit',
+  events: '#/aquesta-nit/esdeveniments',
   entendre: '#/entendre',
   mapa: '#/mapa',
 } as const;

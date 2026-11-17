@@ -235,3 +235,63 @@ a .skymap__cst-name { text-decoration: underline; text-decoration-color: rgba(12
 .deep-avatar--row { width: 24px; height: 24px; margin-top: 1px; }
 .deep-avatar--page { width: 60px; height: 60px; filter: drop-shadow(0 0 14px rgba(160, 180, 255, 0.18)); }
 .chip-link .deep-avatar--row, .chip-link .cst-avatar--row, .chip-link .body-row__dot { width: 20px; height: 20px; margin: 0; }
+
+/* ── Previsió de núvols ── */
+.weather--loading { margin: 0 0 16px; }
+.weather__head { display: flex; gap: 12px; align-items: flex-start; }
+.weather__head h2 { margin: 0 0 4px; font-size: 1.05rem; text-transform: none; letter-spacing: 0; color: var(--text); }
+.weather__badge { flex: none; width: 14px; height: 14px; border-radius: 50%; margin-top: 5px; }
+.weather__badge--bona { background: #5fd38a; box-shadow: 0 0 10px #5fd38a; }
+.weather__badge--regular { background: #ffc94a; box-shadow: 0 0 10px #ffc94a; }
+.weather__badge--dolenta { background: #ff7a6b; box-shadow: 0 0 10px #ff7a6b; }
+.weather__hours { list-style: none; margin: 14px 0 6px; padding: 0; display: flex; gap: 4px; height: 64px; align-items: stretch; }
+.weather__hours li { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 3px; min-width: 0; }
+.weather__bar { width: 100%; max-width: 34px; border-radius: 4px 4px 2px 2px; background: #5fd38a; }
+.weather__bar[data-level="2"] { background: #ffc94a; }
+.weather__bar[data-level="3"] { background: #8b93ab; }
+.weather__h { font-size: .7rem; color: var(--muted); }
+.weather__credit { margin: 6px 0 0; }
+.weather__col { position: relative; width: 100%; max-width: 34px; height: 46px; border-radius: 4px; background: rgba(120, 140, 200, 0.08); }
+.weather__col .weather__bar { position: absolute; left: 0; right: 0; bottom: 0; max-width: none; }
+
+/* ── Mapa del cel amb control de l'hora ── */
+.sky-time { margin-top: 10px; display: grid; gap: 8px; }
+.sky-time__row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.sky-time__label { font-size: 1.05rem; }
+.sky-time__light { font-size: .8rem; color: var(--muted); }
+.sky-time__light--dia { color: #ffc94a; }
+.sky-time input[type="range"] { width: 100%; accent-color: var(--accent); }
+.sky-time__buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.sky-time__buttons button { padding: 6px 12px; font-size: .85rem; }
+.sky-time__full { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
+body.no-scroll { overflow: hidden; }
+.sky-full {
+  position: fixed; inset: 0; z-index: 120; background: #050814; color: var(--text);
+  display: flex; flex-direction: column; padding: max(10px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+}
+.sky-full__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.sky-full__map { flex: 1; min-height: 0; display: grid; place-items: center; }
+.sky-full__map .skymap-wrap { width: min(100%, calc(100dvh - 240px)); display: grid; justify-items: center; }
+.sky-full .sky-time { width: min(100%, 640px); margin: 8px auto 0; }
+
+/* ── Calendari del cel ── */
+.upcoming h2 { display: flex; align-items: center; gap: 8px; }
+.upcoming__all { display: inline-block; margin-top: 10px; font-weight: 600; }
+.event-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.event { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
+.event-list .event:first-child { border-top: none; }
+.event__icon { flex: none; width: 32px; height: 32px; display: grid; place-items: center; font-size: 1.3rem; border-radius: 50%; background: rgba(120, 140, 200, 0.12); }
+.event__main { flex: 1; min-width: 0; }
+.event__date { margin: 0; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.event__title { margin: 2px 0 4px; font-size: 1rem; }
+.event__text { margin: 0 0 4px; }
+.event__look { margin: 4px 0 0; font-size: .88rem; }
+.event__links { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+.event--big .event__icon { background: rgba(255, 201, 74, 0.2); box-shadow: 0 0 12px rgba(255, 201, 74, 0.35); }
+.event--big .event__title { color: var(--accent); }
+.event--hidden { opacity: .6; }
+.event-list--compact .event { padding: 8px 0; }
+.event-list--compact .event__title { margin-bottom: 0; }
+.events-page .chips { margin: 12px 0 4px; flex-wrap: wrap; }
+.events-page__month { margin-top: 22px; }
+.events-page .body-page__back { display: inline-flex; align-items: center; gap: 2px; }

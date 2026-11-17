@@ -56,6 +56,12 @@ export default defineConfig(({ mode }) => ({
         // i s'actualitzen en segon pla; així les fitxes ja vistes funcionen fora de línia.
         runtimeCaching: [
           {
+            // Previsió de núvols: sempre la més nova; si no hi ha connexió, la darrera (com a molt de 6 h)
+            urlPattern: /^https:\/\/api\.open-meteo\.com\//,
+            handler: 'NetworkFirst',
+            options: { cacheName: 'weather', networkTimeoutSeconds: 4, expiration: { maxEntries: 10, maxAgeSeconds: 6 * 3600 } },
+          },
+          {
             urlPattern: /^https:\/\/(ca|en)\.wikipedia\.org\/api\/rest_v1\/page\/summary\//,
             handler: 'StaleWhileRevalidate',
             options: { cacheName: 'wiki-summaries', expiration: { maxEntries: 200, maxAgeSeconds: 30 * 86_400 } },

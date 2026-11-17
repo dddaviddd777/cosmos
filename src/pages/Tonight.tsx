@@ -5,8 +5,12 @@ import { cardinal, towardsCardinal } from '../sky/sky';
 import { darkStart, farTonight, constelTonight, isDark, moonInfo, skyTonight, sunTimes, type FarEntry, type SkyEntry, type SkyStatus } from '../sky/tonight';
 import type { SkyEye } from '../astro/beyond';
 import { Icon } from '../ui/Icon';
-import { SkyMap } from '../ui/SkyMap';
+import { SkyMapExplorer } from '../ui/SkyMapExplorer';
 import { BodyDot } from '../ui/BodyDot';
+import { NightWeather } from '../ui/NightWeather';
+import { EventCard } from '../ui/EventCard';
+import { skyEvents } from '../sky/events';
+import type { Place } from '../sky/sky';
 
 /** «pel nord-est», «per l’est» */
 const towards = (c: string) => (/^[eo]/.test(c) ? `per l’${c}` : `pel ${c}`);
@@ -136,12 +140,17 @@ export function Tonight({ now, onFind }: Props) {
         </p>
       </div>
 
+      {(darkNow || dark) && <NightWeather place={place} from={darkNow ? t : dark!} to={sun.rise} />}
+
+      <UpcomingEvents now={now} place={place} nightEnd={sun.rise} />
+
       <details className="box tonight__map">
         <summary><strong>Mapa del cel {atNow ? 'ara' : when(t, now)}</strong> <span className="muted small">· amb les constel·lacions</span></summary>
-        <SkyMap place={place} now={t} links />
+        <SkyMapExplorer place={place} start={t} now={now} />
         <p className="muted small">
           El centre és just damunt del teu cap i la vora és l’horitzó. Aguanta’l per sobre del cap amb la «N» cap al nord:
-          així coincideix amb el cel. Toca el nom d’una constel·lació per veure’n la fitxa.
+          així coincideix amb el cel. Mou la barra per veure com gira el cel durant la nit, i toca el nom d’una
+          constel·lació per veure’n la fitxa.
         </p>
       </details>
 
@@ -332,5 +341,33 @@ function ConstelRow({ e, onFind }: { e: FarEntry; onFind: (id: string) => void }
         <Icon name="telescope" /><span> Troba-la</span>
       </button>
     </li>
+  );
+}
+
+/** «Properament»: el que passa aquesta nit i els pròxims esdeveniments del cel */
+function UpcomingEvents({ now, place, nightEnd }: { now: Date; place: Place; nightEnd: Date | null }) {
+  const dayKey = Math.floor(now.getTime() / 86_400_000);
+  const events = useMemo(
+    () => skyEvents(new Date(dayKey * 86_400_000), place, 45, 45),
+    [dayKey, place],
+  );
+  const end = (nightEnd ?? new Date(now.getTime() + 18 * 3_600_000)).getTime();
+  // Aquesta nit: des de fa unes hores (p. ex. una fase de la Lluna d'aquesta tarda) fins a l'alba
+  const tonight = events.filter((e) => e.date.getTime() >= now.getTime() - 6 * 3_600_000 && e.date.getTime() <= end);
+  const next = events.filter((e) => e.date.getTime() > end).slice(0, Math.max(1, 3 - tonight.length));
+  if (!tonight.length && !next.length) return null;
+  return (
+    <section className="box upcoming" aria-labelledby="upcoming-title">
+      <h2 id="upcoming-title"><Icon name="calendar" /> {tonight.length ? 'Aquesta nit i properament' : 'Properament'}</h2>
+      {tonight.length > 0 && (
+        <ul className="event-list">
+          {tonight.map((e) => <EventCard key={e.id} e={e} now={now} />)}
+        </ul>
+      )}
+      <ul className="event-list event-list--compact">
+        {next.map((e) => <EventCard key={e.id} e={e} now={now} compact />)}
+      </ul>
+      <a className="upcoming__all" href={hrefFor.events}>Tot el calendari del cel →</a>
+    </section>
   );
 }

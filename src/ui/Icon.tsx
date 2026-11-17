@@ -1,10 +1,17 @@
 import type { ReactNode } from 'react';
 
-export type IconName = 'list' | 'sky' | 'bulb' | 'orbit' | 'telescope' | 'moon' | 'external' | 'pin' | 'close' | 'eye' | 'back';
+export type IconName = 'list' | 'sky' | 'bulb' | 'orbit' | 'telescope' | 'moon' | 'external' | 'pin' | 'close' | 'eye' | 'back' | 'expand' | 'calendar';
 
 /** Icones de traç fi, totes amb la mateixa graella de 24 px, perquè es vegin iguals a tots els dispositius. */
 const PATHS: Record<IconName, ReactNode> = {
   list: <path d="M4 6.5h16M4 12h16M4 17.5h16" />,
+  expand: <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />,
+  calendar: (
+    <>
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
+      <path d="M3.5 10h17M8 3v4M16 3v4" />
+    </>
+  ),
   sky: (
     <>
       <path d="M19.5 14.2A7.8 7.8 0 1 1 9.8 4.5a6.2 6.2 0 0 0 9.7 9.7z" />

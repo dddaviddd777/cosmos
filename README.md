@@ -52,5 +52,6 @@ npm test   # valida el propagador contra les posicions de JPL Horizons
 - [x] C1 — Constel·lacions: les 23 principals que es veuen des de Catalunya, amb la figura, com trobar-les, què hi ha i la llista a «Aquesta nit» (figures de d3-celestial, BSD-3)
 - [x] C2 — Figures de les constel·lacions al mapa del cel (cercador i nou mapa general a «Aquesta nit»), amb la constel·lació buscada ressaltada
 - [x] C3 — Figures de les constel·lacions dibuixades sobre la càmera del cercador (amb botó per amagar-les i el calibratge aplicat)
+- [x] Previsió de núvols per a la nit (Open-Meteo), mapa del cel amb control de l'hora i pantalla completa, i calendari del cel (Lluna, pluges d'estels, eclipsis, trobades, oposicions, estacions)
 
 - [ ] Fase 8 (opcional) — Empaquetar com a app de botiga amb Capacitor
