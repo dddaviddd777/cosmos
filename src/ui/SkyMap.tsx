@@ -4,8 +4,10 @@ import { constellationByOf } from '../astro/constellations';
 import { hrefFor } from '../router';
 import { constellationsInSky } from '../sky/constelSky';
 import { bandQuads, milkyWayInSky } from '../sky/milkyway';
+import { ISS_ID, nextIssSighting, passTrack, upcomingPass, useIssData } from '../sky/iss';
 import { horizontalOf, type Horizontal, type Place } from '../sky/sky';
 import { useStoredFlag } from './prefs';
+import type { PassTrack } from '../sky/iss';
 
 interface Props {
   /** Objecte a ressaltar (opcional: sense, és un mapa general del cel) */
@@ -56,6 +58,14 @@ export function SkyMap({ target, place, now, links = false }: Props) {
     return list;
   }, [minute, place, target]);
 
+  // L'Estació Espacial: si passarà durant la pròxima hora (o, si és el que es busca, el pròxim pas)
+  const iss = useIssData(target?.id === ISS_ID);
+  const issTrack = useMemo(() => {
+    if (!iss.ready) return null;
+    const d = new Date(minute * 60_000);
+    const p = target?.id === ISS_ID ? nextIssSighting(place, d) : upcomingPass(place, d, 60);
+    return p ? passTrack(p, place, d) : null;
+  }, [iss.ready, iss.tle, minute, place, target?.id]);
   const band = useMemo(() => bandQuads(milkyWayInSky(new Date(minute * 60_000), place)), [minute, place]);
   const figures = useMemo(() => (showCst ? constellationsInSky(new Date(minute * 60_000), place) : []), [minute, place, showCst]);
 
@@ -134,6 +144,8 @@ export function SkyMap({ target, place, now, links = false }: Props) {
             return links ? <a key={f.body.id} href={hrefFor.body(f.body.id)}>{label}</a> : <g key={f.body.id}>{label}</g>;
           })}
 
+        {issTrack && issTrack.points.length > 1 && <IssTrackLayer track={issTrack} target={target?.id === ISS_ID} now={now} />}
+
         {items
           .filter((i) => i.h.alt > 0 && i.b.id !== target?.id)
           .map(({ b, h }) => {
@@ -146,7 +158,7 @@ export function SkyMap({ target, place, now, links = false }: Props) {
             );
           })}
 
-        {target && tgt && tgt.h.alt > 0 && (
+        {target && tgt && tgt.h.alt > 0 && !(target.id === ISS_ID && issTrack?.now) && (
           <g transform={`translate(${xy(tgt.h)[0]} ${xy(tgt.h)[1]})`}>
             <circle r={target.constel ? 14 : 9} fill="none" stroke="#ffc94a" strokeWidth="1.5" className="skymap__pulse" />
             {!target.constel && <circle r="3.2" fill={target.color} stroke="#fff" strokeWidth="0.6" />}
@@ -158,5 +170,35 @@ export function SkyMap({ target, place, now, links = false }: Props) {
         <input type="checkbox" checked={showCst} onChange={(e) => setShowCst(e.target.checked)} /> Mostra les constel·lacions
       </label>
     </div>
+  );
+}
+
+const hm = (d: Date) => d.toLocaleTimeString('ca', { hour: '2-digit', minute: '2-digit' });
+
+/** Recorregut de l'ISS: línia discontínua amb fletxa, hora d'aparició i on és ara */
+/** «demà », «dj. »… si el pas no és avui */
+function passDay(d: Date, now: Date): string {
+  const day = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const n = Math.round((day(d) - day(now)) / 86_400_000);
+  return n <= 0 ? '' : n === 1 ? 'demà ' : `${d.toLocaleDateString('ca', { weekday: 'short' })} `;
+}
+
+function IssTrackLayer({ track, target, now }: { track: PassTrack; target: boolean; now: Date }) {
+  const pts = track.points.filter((p) => p.alt > -1).map(xy);
+  if (pts.length < 2) return null;
+  const [ax, ay] = pts[pts.length - 2];
+  const [bx, by] = pts[pts.length - 1];
+  const ang = (Math.atan2(by - ay, bx - ax) * 180) / Math.PI;
+  const [sx, sy] = pts[0];
+  return (
+    <g className={`skymap__iss ${target ? 'skymap__iss--target' : ''}`} aria-label={`Recorregut de l’Estació Espacial a les ${hm(track.pass.start)}`}>
+      <polyline points={pts.map((p) => p.map((v) => v.toFixed(1)).join(',')).join(' ')} />
+      <path d="M0 0 L-4 -2.2 L-4 2.2Z" transform={`translate(${bx.toFixed(1)} ${by.toFixed(1)}) rotate(${ang.toFixed(0)})`} className="skymap__iss-arrow" />
+      <circle cx={sx} cy={sy} r="1.6" className="skymap__iss-start" />
+      <text x={sx} y={sy - 3.5} className="skymap__iss-label">ISS {passDay(track.pass.start, now)}{hm(track.pass.start)}</text>
+      {track.now && (
+        <circle cx={xy(track.now)[0]} cy={xy(track.now)[1]} r="3" className="skymap__iss-now" />
+      )}
+    </g>
   );
 }

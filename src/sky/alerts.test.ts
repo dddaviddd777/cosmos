@@ -64,3 +64,19 @@ describe('avisos', () => {
     expect(relativeDay(at(12, 14), n)).toBe('Demà');
   });
 });
+
+describe('avís de l’Estació Espacial', () => {
+  const pass = {
+    start: new Date('2026-11-19T17:35:00Z'), startAz: 300, peak: new Date('2026-11-19T17:37:00Z'), peakAlt: 41.6, peakAz: 0,
+    end: new Date('2026-11-19T17:40:00Z'), endAz: 60, visible: true, minutes: 5,
+  };
+  it('diu quan falta i per on surt', async () => {
+    const { passAlertText, passEvent } = await import('./alerts');
+    const t = passAlertText(pass, new Date('2026-11-19T17:25:00Z'));
+    expect(t.title).toBe('L’Estació Espacial passa d’aquí a 10 minuts');
+    expect(t.body).toMatch(/^Apareixerà pel nord-oest a les \d\d:\d\d, pujarà fins a 42° i es perdrà pel nord-est\./);
+    const e = passEvent(pass);
+    expect(e.look?.where).toBe('cap al nord-oest');
+    expect(eventsToIcs([e])).toContain('DTSTART:20261119T173500Z');
+  });
+});

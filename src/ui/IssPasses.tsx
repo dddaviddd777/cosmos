@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { issPasses, issState, useIssData, type IssPass } from '../sky/iss';
 import { cardinal, towardsCardinal, type Place } from '../sky/sky';
 import { Icon } from './Icon';
+import { downloadIcs, passEvent } from '../sky/alerts';
 
 /** «Avui», «Demà» o el dia de la setmana (dia de calendari: els passos de matinada són de matinada) */
 function dayLabel(t: Date, now: Date): string {
@@ -81,7 +82,8 @@ export function IssPassList({ place, now, days = 5, limit = 5, onFind, compact =
         <ul className={`iss-passes__list ${compact ? 'iss-passes__list--compact' : ''}`}>
           {passes.map((p) => (
             <li key={p.start.getTime()}>
-              <IssPassText p={p} now={now} />
+              <IssPassText p={p} now={now} />{' '}
+              <button className="link iss-passes__cal" onClick={() => downloadIcs([passEvent(p)], `iss-${p.start.toISOString().slice(0, 16).replace(/[-:T]/g, '')}`)} title="Afegeix aquest pas al calendari, amb un recordatori una hora abans" aria-label="Afegeix aquest pas al calendari">📅</button>
             </li>
           ))}
         </ul>

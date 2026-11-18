@@ -313,3 +313,33 @@ body.no-scroll { overflow: hidden; }
 .iss-passes__now { padding: 8px 10px; border-radius: 10px; background: rgba(255, 201, 74, 0.1); border: 1px solid rgba(255, 201, 74, 0.35); }
 .iss-passes__now button { margin-top: 6px; }
 .iss-box h2 { display: flex; align-items: center; gap: 8px; }
+
+/* La Lluna en detall */
+.moon-box__top { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.moon-box__top p { margin: 2px 0; }
+.moon-box__phase { font-size: 1.25rem; font-weight: 700; }
+.phase-disc { flex: none; filter: drop-shadow(0 0 12px rgba(230, 230, 210, 0.15)); }
+.moon-box__quarters { list-style: none; padding: 0; margin: 14px 0 6px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.moon-box__quarters li { display: flex; gap: 8px; align-items: center; line-height: 1.25; }
+.moon-sights__list { list-style: none; padding: 0; margin: 8px 0 0; }
+.moon-sight { padding: 8px 0; border-top: 1px solid var(--border); }
+.moon-sight p { margin: 4px 0 0; }
+.moon-sight__badge { display: block; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--muted, #9aa6cf); }
+.moon-sight--millor .moon-sight__badge { color: #ffc94a; }
+.moon-sight--fosc { opacity: .6; }
+/* Llunes de Júpiter i fases de Venus */
+.jmoons__view { width: 100%; height: auto; display: block; margin: 8px 0; border-radius: 8px; }
+.jmoons__name { font-size: 4.2px; fill: #c8d2f0; text-anchor: middle; }
+.jmoons__dir { font-size: 5px; fill: #ffc94a; font-weight: 700; }
+.jmoons__notes { margin: 4px 0; padding-left: 18px; }
+.jmoons__time { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; font-size: .9rem; }
+.jmoons__time input { width: 100%; }
+
+/* L'Estació Espacial al mapa del cel */
+.skymap__iss polyline { fill: none; stroke: #78e6ff; stroke-width: 1; stroke-dasharray: 3 2; opacity: .85; }
+.skymap__iss--target polyline { stroke-width: 1.4; opacity: 1; }
+.skymap__iss-arrow { fill: #78e6ff; }
+.skymap__iss-start { fill: #78e6ff; }
+.skymap__iss-label { font-size: 6px; fill: #a9f0ff; text-anchor: middle; font-weight: 700; paint-order: stroke; stroke: #070b1c; stroke-width: 2px; }
+.skymap__iss-now { fill: #fff; stroke: #78e6ff; stroke-width: 1.2; }
+.iss-passes__cal { font-size: 1rem; padding: 0 4px; text-decoration: none; }

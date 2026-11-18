@@ -9,6 +9,8 @@ import { skyEvents } from './events';
 import { loadPlace, PLACE_PRESETS } from './hooks';
 import type { Place } from './sky';
 import { getForecast, nightOutlook } from './weather';
+import { refreshTle, upcomingPass, type IssPass } from './iss';
+import { cardinal } from './sky';
 
 const HOUR = 3_600_000;
 
@@ -132,8 +134,8 @@ function loadSeen(): string[] {
   }
 }
 
-async function notify(title: string, body: string, tag: string): Promise<void> {
-  const opts: NotificationOptions = { body, tag, icon: 'icon-192.png', badge: 'icon-192.png', data: { url: '#/aquesta-nit/esdeveniments' } };
+async function notify(title: string, body: string, tag: string, url = '#/aquesta-nit/esdeveniments'): Promise<void> {
+  const opts: NotificationOptions = { body, tag, icon: 'icon-192.png', badge: 'icon-192.png', data: { url } };
   // Al mòbil cal passar pel service worker; a l'ordinador també funciona directament
   const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : undefined;
   if (reg) await reg.showNotification(title, opts);
@@ -167,4 +169,54 @@ export async function checkAlerts(now = new Date()): Promise<number> {
   } finally {
     running = false;
   }
+}
+
+// ── Estació Espacial ──────────────────────────────────────
+
+const fromDir = (az: number) => {
+  const c = cardinal(az);
+  return /^[eo]/.test(c) ? `per l’${c}` : `pel ${c}`;
+};
+
+/** Un pas de l'ISS com a esdeveniment (per al calendari) */
+export function passEvent(p: IssPass): SkyEvent {
+  return {
+    id: `iss-${p.start.getTime()}`,
+    date: p.start,
+    kind: 'trobada',
+    title: 'Passa l’Estació Espacial Internacional',
+    text: `Apareix ${fromDir(p.startAz)}, puja fins a ${Math.round(p.peakAlt)}° i es perd ${fromDir(p.endAz)}. Es veu uns ${p.minutes} minuts: un punt molt brillant que es mou de pressa, sense parpellejar.`,
+    bodies: ['iss'],
+    visible: true,
+    look: { time: p.start, where: fromDir(p.startAz).replace(/^per l’/, 'cap a l’').replace(/^pel /, 'cap al ') },
+  };
+}
+
+/** Text de l'avís d'un pas que comença aviat */
+export function passAlertText(p: IssPass, now: Date): { title: string; body: string } {
+  const min = Math.max(0, Math.round((p.start.getTime() - now.getTime()) / 60_000));
+  return {
+    title: min <= 1 ? 'L’Estació Espacial passa ara!' : `L’Estació Espacial passa d’aquí a ${min} minuts`,
+    body: `Apareixerà ${fromDir(p.startAz)} a les ${hm(p.start)}, pujarà fins a ${Math.round(p.peakAlt)}° i es perdrà ${fromDir(p.endAz)}. Es veu uns ${p.minutes} min.`,
+  };
+}
+
+/** Avisa uns 10 minuts abans d'un pas visible de l'ISS (si els avisos estan activats i l'app és oberta) */
+export async function checkIssAlert(now = new Date()): Promise<boolean> {
+  if (!alertsEnabled()) return false;
+  await refreshTle();
+  const place: Place = loadPlace() ?? PLACE_PRESETS[0];
+  const p = upcomingPass(place, now, 15);
+  if (!p || p.end < now) return false;
+  const id = `iss-${Math.round(p.start.getTime() / 60_000)}`;
+  const seen = loadSeen();
+  if (seen.includes(id)) return false;
+  const { title, body } = passAlertText(p, now);
+  await notify(title, body, id, '#/cos/iss');
+  try {
+    localStorage.setItem(SEEN_KEY, JSON.stringify([...seen, id].slice(-60)));
+  } catch {
+    /* sense emmagatzematge */
+  }
+  return true;
 }

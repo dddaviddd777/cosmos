@@ -5,6 +5,7 @@
 import { project, type Mat3, type Projection } from '../sky/orientation';
 import type { SkyFigure } from '../sky/constelSky';
 import type { BandQuad } from '../sky/milkyway';
+import type { Horizontal } from '../sky/sky';
 
 export interface ArParams {
   R: Mat3;
@@ -26,7 +27,7 @@ const MAX_OFF = 75;
 
 const ok = (p: Projection) => p.front && p.offAngle < MAX_OFF;
 
-export function drawFigures(canvas: HTMLCanvasElement, figures: SkyFigure[], p: ArParams, band: BandQuad[] = []): void {
+export function drawFigures(canvas: HTMLCanvasElement, figures: SkyFigure[], p: ArParams, band: BandQuad[] = [], track: Horizontal[] = []): void {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const [cw, ch] = [Math.round(p.w * dpr), Math.round(p.h * dpr)];
   if (canvas.width !== cw || canvas.height !== ch) {
@@ -52,6 +53,23 @@ export function drawFigures(canvas: HTMLCanvasElement, figures: SkyFigure[], p: 
       ctx.fill();
     }
     ctx.filter = 'none';
+  }
+
+  // Recorregut de l'Estació Espacial: per on passarà
+  if (track.length > 1) {
+    const pr = track.map((h) => project({ az: h.az + p.daz, alt: h.alt + p.dalt }, p.R, p.screenAngle, p.focal, p.w, p.h));
+    ctx.save();
+    ctx.setLineDash([8, 6]);
+    ctx.strokeStyle = 'rgba(120, 230, 255, 0.85)';
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    for (let i = 1; i < pr.length; i++) {
+      if (!ok(pr[i - 1]) || !ok(pr[i]) || track[i].alt < 0) continue;
+      ctx.moveTo(pr[i - 1].x, pr[i - 1].y);
+      ctx.lineTo(pr[i].x, pr[i].y);
+    }
+    ctx.stroke();
+    ctx.restore();
   }
 
   // La ressaltada, l'última: queda per sobre

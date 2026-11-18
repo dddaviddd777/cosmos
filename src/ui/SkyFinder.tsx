@@ -9,6 +9,7 @@ import {
 import { cardinal, towardsCardinal, horizontalOf, nextRise, skyTargetOf, visibilityOf, type Horizontal } from '../sky/sky';
 import { SkyMap } from './SkyMap';
 import { clearFigures, drawFigures } from './arFigures';
+import { ISS_ID, nextIssSighting, passTrack } from '../sky/iss';
 import { useStoredFlag } from './prefs';
 import { constellationsInSky, type SkyFigure } from '../sky/constelSky';
 import { bandQuads, milkyWayInSky, type BandQuad } from '../sky/milkyway';
@@ -122,8 +123,15 @@ export function SkyFinder({ body, onClose, night, onNight }: Props) {
     [cameraMode, showCst, place, minute],
   );
   const highlight = target.constel ? target.id : target.sky ? constellationByOf(target.sky.constellation)?.id : undefined;
-  const figRef = useRef({ figures, band, calib, highlight });
-  figRef.current = { figures, band, calib, highlight };
+  // Buscant l'ISS: el recorregut del pas en curs o del pròxim
+  const track = useMemo(() => {
+    if (!cameraMode || target.id !== ISS_ID || !place) return [];
+    const d = new Date(minute * 60_000);
+    const p = nextIssSighting(place, d);
+    return p ? passTrack(p, place, d).points : [];
+  }, [cameraMode, target.id, place, minute]);
+  const figRef = useRef({ figures, band, calib, highlight, track });
+  figRef.current = { figures, band, calib, highlight, track };
   useEffect(() => {
     if (!showCst) clearFigures(canvas.current);
   }, [showCst]);
@@ -147,11 +155,11 @@ export function SkyFinder({ body, onClose, night, onNight }: Props) {
         const sa = screenAngle();
         setView({ cam: cameraDirection(R), proj: project(tgt, R, sa, f, w, h), absolute: r.absolute });
         const fig = figRef.current;
-        if (canvas.current && fig.figures.length) {
+        if (canvas.current && (fig.figures.length || fig.track.length)) {
           drawFigures(canvas.current, fig.figures, {
             R, screenAngle: sa, focal: f, w, h, daz: fig.calib.daz, dalt: fig.calib.dalt, highlight: fig.highlight,
             noLabel: target.constel ? target.id : undefined,
-          }, fig.band);
+          }, fig.band, fig.track);
         }
       }
       raf = requestAnimationFrame(loop);

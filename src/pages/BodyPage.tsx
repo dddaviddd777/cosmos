@@ -12,6 +12,8 @@ import { IssPassList } from '../ui/IssPasses';
 import { ISS_ID, issState, useIssData } from '../sky/iss';
 import { PLACE_PRESETS, useLocation } from '../sky/hooks';
 import { OrbitFacts } from '../ui/OrbitFacts';
+import { MoonDetails } from '../ui/MoonDetails';
+import { JupiterMoonsBox, VenusPhaseBox } from '../ui/PlanetViews';
 import { Term } from '../ui/Term';
 import { Icon } from '../ui/Icon';
 import { ConstellationFigure } from '../ui/ConstellationFigure';
@@ -106,6 +108,9 @@ export function BodyPage({ body, now, onFind, onShowOnMap }: Props) {
       </section>}
 
       {body.sky && <FindFar body={body} />}
+      {body.id === 'moon' && <MoonDetails now={now} />}
+      {body.id === 'jupiter' && <JupiterMoonsBox now={now} />}
+      {body.id === 'venus' && <VenusPhaseBox now={now} />}
 
       {!body.sky && body.id !== ISS_ID && (body.id === 'sun' || body.id === 'earth' || dist) && (
         <section className="box where-box" aria-labelledby="where-title">

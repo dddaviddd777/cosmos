@@ -5,7 +5,7 @@ import { Explore, INITIAL_EXPLORE, type ExploreState } from './pages/Explore';
 import { initialMapState, MapPage, sceneIdFor, type MapState } from './pages/MapPage';
 import { Tonight } from './pages/Tonight';
 import { Events } from './pages/Events';
-import { checkAlerts } from './sky/alerts';
+import { checkAlerts, checkIssAlert } from './sky/alerts';
 import { Understand } from './pages/Understand';
 import { hrefFor, navigate, useNow, useRoute, type Tab } from './router';
 import { HelpDialog } from './ui/HelpDialog';
@@ -31,6 +31,11 @@ export default function App() {
   useEffect(() => {
     checkAlerts().catch(() => {});
   }, [hourKey]);
+  // L'Estació Espacial passa en pocs minuts: es mira cada 2 minuts si n'hi ha un pas a punt de començar
+  const issKey = Math.floor(now.getTime() / 120_000);
+  useEffect(() => {
+    checkIssAlert().catch(() => {});
+  }, [issKey]);
   const [night, setNight] = useNightMode();
   const [welcomed, setWelcomed] = useStoredFlag('cosmos.welcomed', false);
   const [helpOpen, setHelpOpen] = useState(() => !welcomed);

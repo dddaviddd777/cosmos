@@ -224,3 +224,30 @@ export function issPasses(place: Place, from: Date, days = 5, onlyVisible = true
 export function nextIssSighting(place: Place, from: Date): IssPass | null {
   return issPasses(place, from, 5, true).find((p) => p.end.getTime() > from.getTime()) ?? null;
 }
+
+export interface PassTrack {
+  pass: IssPass;
+  /** Punts del recorregut visible, cada 20 s */
+  points: Horizontal[];
+  /** On és ara, si ja ha començat i encara es veu */
+  now: Horizontal | null;
+}
+
+/** Recorregut d'un pas (només el tram visible) */
+export function passTrack(pass: IssPass, place: Place, now: Date): PassTrack {
+  const points: Horizontal[] = [];
+  for (let t = pass.start.getTime(); t <= pass.end.getTime(); t += STEP) {
+    const s = issState(new Date(t), place);
+    if (s) points.push(s.pos);
+  }
+  const live = now >= pass.start && now <= pass.end ? issState(now, place)?.pos ?? null : null;
+  return { pass, points, now: live };
+}
+
+/** El pas visible en curs o el pròxim que comenci abans de `withinMin` minuts (null si no n'hi ha) */
+export function upcomingPass(place: Place, now: Date, withinMin = 60): IssPass | null {
+  if (!tleUsable(now)) return null;
+  const p = issPasses(place, new Date(now.getTime() - 15 * 60_000), (withinMin + 30) / 1440)
+    .find((x) => x.end > now && x.start.getTime() - now.getTime() <= withinMin * 60_000);
+  return p ?? null;
+}

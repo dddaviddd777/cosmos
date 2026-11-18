@@ -138,7 +138,7 @@ function AlertsBox({ onCalendar, count }: { onCalendar: () => void; count: numbe
           <p className="muted alerts-box__note">
             {state === 'denied'
               ? 'Has bloquejat els avisos d’aquesta app. Els pots tornar a permetre a la configuració del navegador.'
-              : 'T’avisarà el dia abans o el mateix dia, amb la previsió de núvols. Els avisos arriben quan obres l’app: una web no pot enviar-los tota sola amb l’app tancada.'}
+              : 'T’avisarà el dia abans o el mateix dia, amb la previsió de núvols, i uns 10 minuts abans que passi l’Estació Espacial. Els avisos arriben quan obres l’app: una web no pot enviar-los tota sola amb l’app tancada.'}
           </p>
         </>
       )}
