@@ -148,7 +148,7 @@ export default function App() {
 
       {finderId && bodyById(finderId) && (
         <Suspense fallback={<div className="finder finder--loading" role="status"><span className="spinner" aria-hidden="true" /> Preparant el cel…</div>}>
-          <SkyFinder body={bodyById(finderId)!} onClose={() => setFinderId(null)} night={night} onNight={setNight} />
+          <SkyFinder body={bodyById(finderId)!} onClose={() => setFinderId(null)} night={night} onNight={setNight} onSwitch={setFinderId} />
         </Suspense>
       )}
 

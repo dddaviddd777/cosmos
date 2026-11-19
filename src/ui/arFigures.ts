@@ -6,6 +6,17 @@ import { project, type Mat3, type Projection } from '../sky/orientation';
 import type { SkyFigure } from '../sky/constelSky';
 import type { BandQuad } from '../sky/milkyway';
 import type { Horizontal } from '../sky/sky';
+import type { SkyObject } from '../sky/skyObjects';
+
+/** Zona tocable d'un nom a la pantalla (per buscar aquell objecte) */
+export interface ObjectHit {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
 
 export interface ArParams {
   R: Mat3;
@@ -27,7 +38,10 @@ const MAX_OFF = 75;
 
 const ok = (p: Projection) => p.front && p.offAngle < MAX_OFF;
 
-export function drawFigures(canvas: HTMLCanvasElement, figures: SkyFigure[], p: ArParams, band: BandQuad[] = [], track: Horizontal[] = []): void {
+export function drawFigures(
+  canvas: HTMLCanvasElement, figures: SkyFigure[], p: ArParams, band: BandQuad[] = [], track: Horizontal[] = [],
+  objects: SkyObject[] = [], skipId?: string,
+): ObjectHit[] {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const [cw, ch] = [Math.round(p.w * dpr), Math.round(p.h * dpr)];
   if (canvas.width !== cw || canvas.height !== ch) {
@@ -35,7 +49,7 @@ export function drawFigures(canvas: HTMLCanvasElement, figures: SkyFigure[], p: 
     canvas.height = ch;
   }
   const ctx = canvas.getContext('2d');
-  if (!ctx) return;
+  if (!ctx) return [];
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, p.w, p.h);
   ctx.lineCap = 'round';
@@ -111,6 +125,67 @@ export function drawFigures(canvas: HTMLCanvasElement, figures: SkyFigure[], p: 
       ctx.fillText(f.body.name, c.x, c.y);
     }
   }
+
+  return drawObjects(ctx, objects, p, skipId);
+}
+
+/** Mida del punt segons la magnitud (com més brillant, més gros) */
+const dotR = (mag: number) => Math.min(7, Math.max(2, 4.6 - 0.9 * mag));
+
+/**
+ * Els objectes brillants amb el seu nom, per sobre de tot. Es posen nom del més brillant al més feble
+ * i se'n salta un si se superposaria a un altre. Retorna on és cada nom per poder-lo tocar.
+ */
+function drawObjects(ctx: CanvasRenderingContext2D, objects: SkyObject[], p: ArParams, skipId?: string): ObjectHit[] {
+  const hits: ObjectHit[] = [];
+  const taken: { x: number; y: number; w: number; h: number }[] = [];
+  const overlaps = (r: { x: number; y: number; w: number; h: number }) =>
+    taken.some((t) => r.x < t.x + t.w && r.x + r.w > t.x && r.y < t.y + t.h && r.y + r.h > t.y);
+
+  for (const o of objects) {
+    if (o.id && o.id === skipId) continue;
+    const q = project({ az: o.pos.az + p.daz, alt: o.pos.alt + p.dalt }, p.R, p.screenAngle, p.focal, p.w, p.h);
+    if (!q.onScreen || !ok(q)) continue;
+    const below = o.pos.alt < 0;
+    const r = dotR(o.mag);
+    ctx.globalAlpha = below ? 0.45 : 1;
+
+    // Marca: un cercle al voltant (la imatge real ja hi mostra el punt; el cercle ajuda a trobar-lo)
+    ctx.lineWidth = o.kind === 'planeta' || o.kind === 'iss' ? 2 : 1.4;
+    ctx.strokeStyle = o.kind === 'sol' ? 'rgba(255, 120, 80, 0.95)' : o.kind === 'planeta' ? o.color : o.kind === 'iss' ? '#9ff0ff' : 'rgba(225, 232, 255, 0.85)';
+    ctx.beginPath();
+    ctx.arc(q.x, q.y, o.kind === 'lluna' || o.kind === 'sol' ? 26 : r + 5, 0, Math.PI * 2);
+    ctx.stroke();
+    if (o.kind !== 'lluna' && o.kind !== 'sol') {
+      ctx.fillStyle = o.kind === 'planeta' ? o.color : 'rgba(240, 244, 255, 0.95)';
+      ctx.beginPath();
+      ctx.arc(q.x, q.y, r * 0.55, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Nom
+    const label = o.kind === 'sol' ? '⚠️ Sol: no el miris' : below ? `${o.name} (sortint)` : o.name;
+    const bold = o.kind === 'planeta' || o.kind === 'lluna' || o.kind === 'iss' || o.mag < 0.5;
+    ctx.font = `${bold ? '700 ' : ''}${o.kind === 'planeta' || o.kind === 'iss' ? 14 : 12.5}px system-ui, sans-serif`;
+    ctx.textAlign = 'left';
+    const off = (o.kind === 'lluna' || o.kind === 'sol' ? 30 : r + 9);
+    const w = ctx.measureText(label).width;
+    const box = { x: q.x + off - 4, y: q.y - 11, w: w + 8, h: 22 };
+    if (overlaps(box)) {
+      ctx.globalAlpha = 1;
+      continue;
+    }
+    taken.push(box);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+    ctx.strokeText(label, q.x + off, q.y + 4);
+    ctx.fillStyle = o.kind === 'planeta' ? '#ffe2a8' : o.kind === 'iss' ? '#bff6ff' : o.kind === 'sol' ? '#ffb199' : '#e9eeff';
+    ctx.fillText(label, q.x + off, q.y + 4);
+    ctx.globalAlpha = 1;
+    // Zona tocable: el nom i el punt
+    if (o.id && o.kind !== 'sol') hits.push({ id: o.id, name: o.name, x: Math.min(q.x - r - 8, box.x), y: box.y - 6, w: box.x + box.w - Math.min(q.x - r - 8, box.x), h: box.h + 12 });
+  }
+  return hits;
 }
 
 export function clearFigures(canvas: HTMLCanvasElement | null): void {

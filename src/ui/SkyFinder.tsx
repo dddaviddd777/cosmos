@@ -8,7 +8,8 @@ import {
 } from '../sky/hooks';
 import { cardinal, towardsCardinal, horizontalOf, nextRise, skyTargetOf, visibilityOf, type Horizontal } from '../sky/sky';
 import { SkyMap } from './SkyMap';
-import { clearFigures, drawFigures } from './arFigures';
+import { clearFigures, drawFigures, type ObjectHit } from './arFigures';
+import { skyObjects, type SkyObject } from '../sky/skyObjects';
 import { ISS_ID, nextIssSighting, passTrack } from '../sky/iss';
 import { useStoredFlag } from './prefs';
 import { constellationsInSky, type SkyFigure } from '../sky/constelSky';
@@ -21,6 +22,8 @@ interface Props {
   onClose: () => void;
   night: boolean;
   onNight: (on: boolean) => void;
+  /** Tocar el nom d'un altre objecte a la càmera: passa a buscar aquell */
+  onSwitch?: (id: string) => void;
 }
 
 /** Camp de visió típic de la càmera principal d'un mòbil, en el costat llarg */
@@ -70,7 +73,7 @@ function dayLabel(d: Date, now: Date): string {
   return days <= 0 ? 'avui' : days === 1 ? 'demà' : 'demà passat';
 }
 
-export function SkyFinder({ body, onClose, night, onNight }: Props) {
+export function SkyFinder({ body, onClose, night, onNight, onSwitch }: Props) {
   const dialog = useDialog<HTMLDivElement>(onClose);
   const target = skyTargetOf(body);
   const [phase, setPhase] = useState<'intro' | 'running'>('intro');
@@ -130,8 +133,18 @@ export function SkyFinder({ body, onClose, night, onNight }: Props) {
     const p = nextIssSighting(place, d);
     return p ? passTrack(p, place, d).points : [];
   }, [cameraMode, target.id, place, minute]);
-  const figRef = useRef({ figures, band, calib, highlight, track });
-  figRef.current = { figures, band, calib, highlight, track };
+  // La resta d'objectes brillants, amb el nom, per saber què és cada punt que es veu (cada 2 s: l'ISS es mou de pressa)
+  const tick = Math.floor(now.getTime() / 2000);
+  const objects = useMemo<SkyObject[]>(
+    () => (cameraMode && place ? skyObjects(new Date(tick * 2000), place) : []),
+    [cameraMode, place, tick],
+  );
+  const hitsRef = useRef<ObjectHit[]>([]);
+  // Tot el que fa servir el bucle de dibuix, sempre al dia (també si es canvia d'objectiu tocant-ne el nom)
+  const targetId = target.id;
+  const noLabel = target.constel ? target.id : undefined;
+  const figRef = useRef({ figures, band, calib, highlight, track, objects, targetId, noLabel });
+  figRef.current = { figures, band, calib, highlight, track, objects, targetId, noLabel };
   useEffect(() => {
     if (!showCst) clearFigures(canvas.current);
   }, [showCst]);
@@ -155,11 +168,11 @@ export function SkyFinder({ body, onClose, night, onNight }: Props) {
         const sa = screenAngle();
         setView({ cam: cameraDirection(R), proj: project(tgt, R, sa, f, w, h), absolute: r.absolute });
         const fig = figRef.current;
-        if (canvas.current && (fig.figures.length || fig.track.length)) {
-          drawFigures(canvas.current, fig.figures, {
+        if (canvas.current) {
+          hitsRef.current = drawFigures(canvas.current, fig.figures, {
             R, screenAngle: sa, focal: f, w, h, daz: fig.calib.daz, dalt: fig.calib.dalt, highlight: fig.highlight,
-            noLabel: target.constel ? target.id : undefined,
-          }, fig.band, fig.track);
+            noLabel: fig.noLabel,
+          }, fig.band, fig.track, fig.objects, fig.targetId);
         }
       }
       raf = requestAnimationFrame(loop);
@@ -220,7 +233,24 @@ export function SkyFinder({ body, onClose, night, onNight }: Props) {
   const arrowR = Math.min(window.innerWidth, window.innerHeight) * 0.3;
 
   return (
-    <div ref={dialog} className={`finder ${cameraMode ? 'finder--camera' : ''}`} role="dialog" aria-modal="true" aria-label={`Troba ${withArticle(body)} al cel`}>
+    <div
+      ref={dialog}
+      className={`finder ${cameraMode ? 'finder--camera' : ''}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Troba ${withArticle(body)} al cel`}
+      onClick={(e) => {
+        // Tocar el nom d'un objecte a la càmera el converteix en el que es busca
+        if (!cameraMode || !onSwitch || (e.target as HTMLElement).closest('button, a, select, input, section, header')) return;
+        const box = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        const [x, y] = [e.clientX - box.left, e.clientY - box.top];
+        const hit = hitsRef.current.find((h) => x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h);
+        if (hit && hit.id !== body.id) {
+          onSwitch(hit.id);
+          setNotice(`Ara busques: ${hit.name}`);
+        }
+      }}
+    >
       {cameraMode && <video ref={video} className="finder__video" playsInline muted autoPlay />}
 
       <header className="finder__top">
@@ -330,6 +360,7 @@ export function SkyFinder({ body, onClose, night, onNight }: Props) {
                     ✦ Constel·lacions
                   </button>
                 </div>
+                {onSwitch && objects.length > 0 && <p className="muted finder__tip">Toca el nom d’un altre planeta o estrella per buscar-lo.</p>}
               </>
             ) : (
               vis.pos.alt >= 0 && <p className="finder__guide">{where}</p>

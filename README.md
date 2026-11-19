@@ -56,5 +56,6 @@ npm test   # valida el propagador contra les posicions de JPL Horizons
 - [x] Via Làctia: franja al mapa del cel i a la càmera, i fitxa pròpia amb «Troba-la al cel» (apunta a la part més brillant visible)
 - [x] Mapa 3D amb textures reals (Solar System Scope, CC BY 4.0), anells de Saturn i Terra que gira segons l'hora; avisos d'esdeveniments (notificació en obrir l'app i fitxer de calendari .ics amb recordatori); Estació Espacial Internacional (SGP4 amb dades de CelesTrak): passos visibles, fitxa i «Troba-la al cel»
 - [x] La Lluna en detall (fase, sortida i posta, properes fases i què s'hi veu millor cada dia); llunes de Júpiter amb prismàtics i fases de Venus; recorregut de l'Estació Espacial al mapa del cel i a la càmera, avís 10 minuts abans i cada pas al calendari
+- [x] Càmera de «Troba'l al cel»: la resta d'objectes brillants (Sol, Lluna, planetes, estrelles, cel profund a ull nu i l'ISS) amb el seu nom; tocar-ne un passa a buscar-lo
 
 - [ ] Fase 8 (opcional) — Empaquetar com a app de botiga amb Capacitor
